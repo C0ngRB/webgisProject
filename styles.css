@@ -1,0 +1,674 @@
+/* 基础样式 */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f3f4f6;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* 导航栏样式 */
+#navbar {
+    background-color: #12513D;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: sticky;  /* 使导航栏在滚动时固定在顶部 */
+    border-radius: 0.5rem;
+    top: 0;
+    z-index: 1000;
+}
+
+.nav-content {
+    display: flex;      /* 使用弹性布局 */
+    justify-content: center;  /* 水平居中对齐 */
+    align-items: center;    /* 垂直居中对齐 */
+    padding: 0.8rem 0;
+}
+
+.nav-links {
+    display: flex; 
+    gap: 4rem;
+}
+
+.nav-links a {
+    color: #fff;
+    font-size: 1.2rem;
+    text-decoration: none; /* 去掉下划线 */
+    transition: font-size 0.5s ease, color 0.5s ease; /* 鼠标点击后变化时的过渡效果 */
+}
+
+.nav-links a:hover {
+    color: #fff;     /* 鼠标悬停时链接颜色变为蓝色 */
+    font-size: 1.4rem;
+    font-weight: bold; /* 鼠标悬停时字体加粗 */
+}
+
+.mobile-menu {
+    display: none;     /* 隐藏移动设备上的导航栏按钮 */
+}
+
+#mobile-menu-button svg {
+    width: 24px;
+    height: 24px;
+    fill: #6b7280;
+}
+
+/* 首页样式 */
+#home {
+    position: relative; /* 确保背景图片在内容下方 */
+    color: #12513D;
+    padding: 5rem 0;
+    text-align: center;
+    height: 13rem;
+    border-radius: 0.5rem;
+    overflow: hidden; /* 防止背景图片溢出 */
+}
+
+.bg-carousel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+/* 初始透明度为0，表示图片最初是不可见的。 */
+.carousel-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;     /*创建淡入淡出效果*/
+}
+
+/* 将透明度设置为0.4，表示活动（即当前显示的）图片是可见的 */
+.carousel-image.active {
+    opacity: 0.4;
+}
+
+#home h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+#home p {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 2rem;
+}
+
+/* 个人介绍区域样式 */
+#about {
+    padding: 2rem 0;
+    background-color: #f9fafb;
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.section-header h2 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.divider {
+    height: 2px;
+    background: linear-gradient(90deg, rgba(195, 220, 196, 0.5) 0%, rgba(18, 81, 61, 1) 50%, rgba(195, 220, 196, 0.5) 100%);
+    width: 100px;
+    margin: 0 auto;
+    margin-bottom: 0.25rem;
+}
+
+.section-header p {
+    max-width: 600px;
+    margin: 0 auto;
+    font-size: 1rem;
+    color: #6b7280;
+}
+
+.about-content {
+    display: flex;
+    align-items: center;
+    gap: 5rem;
+    margin:0 2rem;
+}
+
+.about-image img {
+    width: 22rem;
+    height: 22rem;
+    border-radius: 5%;
+    object-fit: cover;
+    margin-right: 3rem;
+}
+
+.about-text {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between; /* 从行的开始位置对齐 */
+    gap: 1.5rem;
+}
+
+.info-item {
+    display: flex; 
+    white-space: nowrap; /* 防止文本换行 */
+    align-items: center; /* 图标和文本垂直居中对齐 */
+    flex: 1 1 45%; /* 每个信息项占据45%的宽度 */
+    max-width: 48%; /* 最大宽度限制 */
+    margin-bottom: 0.25rem; 
+}
+
+.info-item i {
+    margin-right: 0.75rem;
+    font-size: 1.25rem;
+    color: #12513D;
+}
+
+.info-item span {
+    font-size: 1.1rem;
+    color: #374151;
+}
+
+/* 专业课程样式 */
+#courses {
+    padding: 2rem 0 1rem 0;
+    background-color: #fff;
+}
+
+.course-categories {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.course-categories button {
+    font-size: 0.8rem;
+    background-color: #fff;
+    border: 2px solid #6b7280;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    color: #6b7280;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.course-categories button:hover {
+    background-color: #C3DCC4;
+}
+
+.course-categories button.active {
+    background-color: #12513D;
+    color: #fff;
+}
+
+.course-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin:0 5rem 1rem 5rem; /* 添加底部间距 */
+}
+
+.course-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); 
+    grid-template-rows: repeat(4, 1fr); 
+    gap: 1rem;
+    margin-bottom: 1rem;
+} 
+
+.course-card {
+    /* background-color: #efefef; */
+    background: linear-gradient(135deg, #ffffff 0%, #f3f6f5 100%);
+    /* border: 2px solid #12513D; */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 0.5rem;
+    padding: 0 2rem 1rem;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.course-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.course-icon {
+    font-size: 2rem;
+    color: #12513D;
+    margin-right: 0.8rem;
+}
+
+.course-description {
+    color: #374151;
+    font-size: 0.95rem;
+}
+
+.course-info {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 10px;
+    border-top: 1px solid #12513D;
+    margin-top: 10px;
+}
+
+.course-credit {
+    color: #6b7280;
+    font-size: 0.85rem;
+}
+
+.course-grade {
+    color: #12513D;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.course-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+}
+
+.course-card h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    color: #12513D;
+}
+
+.pagination {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.pagination button {
+    padding: 0.2rem;
+    margin: 0 0.5rem;
+    background-color: #efefef; 
+    border: 1px solid #6b7280; 
+    color:#12513D;
+    border-radius: 0.25rem;
+    cursor: pointer;
+}
+
+.pagination span {
+    color:#6b7280;
+}
+
+/* 竞赛经历样式 */
+#honor {
+    padding: 2rem 0;
+    background-color: #f3f6f5;
+}
+
+.honor-categories {
+    height:2.5rem;
+    display: flex;
+    justify-content: center; /* 水平居中对齐 */
+    gap: 1rem; /* 设置按钮之间的间距 */
+    margin-bottom: 2rem;
+}
+
+.honor-categories button {
+    flex: 1; /* 让按钮自适应宽度 */
+    max-width: 5rem; /* 设置最大宽度 */
+    text-align: center; /* 文本居中 */
+    border-radius: 0.5rem;
+    border: 2px solid #6b7280;
+    color: #6b7280;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.honor-categories button:hover {
+    background-color: #C3DCC4;
+}
+
+.honor-categories button.active {
+    background-color: #12513D;
+    color: #fff;
+}
+
+.timeline {
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 5%;
+    width: 4px;
+    background-color: #12513D;
+    transform: translateX(-50%);
+}
+
+.timeline-item {
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.timeline-item:last-child {
+    margin-bottom: 0;
+}
+
+.timeline-date {
+    width: 30%;
+    background-color: #12513D;
+    color: white;
+    padding: 0.5rem 1rem;
+    text-align: center;
+    border-radius: 20px;
+    font-size: 1.2rem bold;
+}
+
+.timeline-content {
+    width: 100%;
+    padding: 1rem;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    margin-top: 1rem;
+}
+
+.timeline-content h3 {
+    margin-top: 0;
+    color: #12513D;
+}
+
+.award {
+    margin: 0.5rem 0;
+    color: #12513D;
+    font-weight: bold;
+}
+
+.info {
+    margin: 0.5rem 0;
+    color: #333;
+}
+
+/* 旅行区域样式 */
+#travel {
+    padding: 2rem 0;
+    background-color: #f3f6f5;
+    text-align: center; /* 添加这行 */
+
+}
+
+.map-container {
+     width: 80%; 
+     height: 35rem; 
+     border: 2px solid #12513D;
+     border-radius: 2%;
+     overflow: hidden; /* 添加这行防止内容溢出 */
+     padding: 0; /* 确保内边距为0 */
+     z-index: 10;
+}
+.map-container iframe {
+    width: 100%;
+    height: 100%;
+    border: none; /* 移除iframe边框 */
+    display: block; /* 确保iframe作为块级元素显示 */
+}
+.travel-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+    z-index:-2; 
+}
+
+.travel-card {   
+    position: relative;
+    width: 10rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    z-index:1; 
+}
+
+.travel-card .travel-card-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index:-1; 
+}
+
+/* 初始透明度为0，表示图片最初是不可见的。 */
+.travel-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.3;
+}
+
+.travel-card .card-body {
+    padding: 0 1rem 1rem 1rem;
+    
+}
+
+.travel-card h3 {
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+    color: #12513D;
+}
+
+.travel-card p {
+    color: #26292d;
+    height:6rem;
+    font-size: 0.8rem;
+    margin-bottom: 1rem;
+}
+
+.travel-card .details-btn {
+    color: #12513D;
+    text-decoration: none;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem;
+    background-color: #efefef; 
+    border: 1px solid #C3DCC4; 
+    border-radius: 2px; 
+    display: inline-flex;
+    align-items: center;
+    transition: font-size 0.3s ease; 
+}
+
+.travel-card .details-btn:hover {
+    font-size: 0.85rem;
+    text-decoration: underline;
+}
+
+/* 书籍区域样式 */
+#books {
+    padding: 2rem 0 4rem 0 ;
+    background-color: #f7f7f7;
+}
+
+.book-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 2rem;
+}
+
+.book-card {
+    width: 16.5rem;
+    height: 25rem;
+    background-color: #fff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    transition: box-shadow 0.3s ease;
+}
+
+.book-card:hover {
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+}
+
+.book-card img {
+    width: 100%;
+    height: 55%;
+    object-fit: cover;
+}
+
+.book-card .card-body {
+    padding: 0 1rem;
+    margin-top: -1rem;
+}
+
+.book-card h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.book-card .author {
+    color: #6b7280;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.book-card .date {
+    color: #6b7280;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.book-card .tags {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.book-card .tag {
+    background-color: #C3DCC4;
+    color: #12513D;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.5rem;
+}
+
+.book-card .details-btn {
+    color: #12513D;
+    text-decoration: none;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem;
+    background-color: #efefef; 
+    border: 1px solid #C3DCC4; 
+    border-radius: 2px; 
+    display: inline-flex;
+    align-items: center;
+    transition: font-size 0.3s ease; 
+}
+
+.book-card .details-btn:hover {
+    font-size: 0.85rem;
+    text-decoration: underline;
+}
+
+/* 页脚样式 */
+footer {
+    background-color: #12513D;
+    color: #e5e7eb;
+    padding: 2rem 0;
+}
+
+.footer-content h3 {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+}
+
+.footer-content p {
+    margin-bottom: -1rem;
+}
+
+/* .footer-content 设置为弹性容器，并设置了子元素之间的间距,子元素将默认沿着主轴（水平方向）排列 */
+.footer-content {
+    display: flex;
+    gap: 18.5rem;
+    margin-bottom: 2rem;
+}
+
+.footer-links {
+    flex: 1;
+    /* gap: 0.6rem; */
+}
+
+.footer-links ul {
+    list-style: none;
+    width: 100%; 
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.footer-links li {
+    flex: 1 1 40%; 
+}
+
+.footer-links li a {
+    color: #e5e7eb;
+    text-decoration: none;
+    transition: font-size 0.3s ease;
+}
+
+.footer-links li a:hover {
+    color: #e5e7eb;
+    font-size: 1.125rem;
+    font-weight: bold;
+}
+
+.footer-content ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-content ul li {
+    margin-bottom: 0.6rem;
+}
+
+.footer-bottom {
+    text-align: center;
+    font-size: 0.875rem;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .nav-links {
+        display: none;
+    }
+
+    .mobile-menu {
+        display: block;
+    }
+
+    .course-cards,
+    .travel-cards,
+    .book-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .about-content {
+        flex-direction: column;
+        align-items: center;
+    }
+}

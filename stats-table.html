@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            margin: 0;
+            padding: 10px;
+            font-family: Arial, sans-serif;
+            font-size: 10px;
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+        .filter-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .filter-container select {
+            padding: 5px;
+            border-radius: 3px;
+            border: 1px solid #ddd;
+        }
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+        .stats-table th, .stats-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .stats-table th {
+            background-color: #12513D;
+            color: white;
+        }
+        .stats-table th:nth-child(1),
+        .stats-table td:nth-child(1) {
+            width: 30px;  /* 扩大省份列的宽度 */
+        }
+        .stats-table th:nth-child(2),
+        .stats-table td:nth-child(2) {
+            width: 40px;  /* 扩大省份列的宽度 */
+        }
+        .stats-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        .close-btn {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            cursor: pointer;
+            color: #12513D;
+            font-weight: bold;
+        }
+        .stats-summary {
+            text-align: right;
+            font-size: 12px;
+            color: #12513D;
+        }
+    </style>
+</head>
+<body>
+    <div class="close-btn" onclick="closeStats()">×</div>
+    <div class="filter-container">
+        <select id="provinceFilter" onchange="filterTable()">
+            <option value="">所有省份</option>
+        </select>
+        <select id="cityFilter" onchange="filterTable()">
+            <option value="">所有城市</option>
+        </select>
+    </div>
+    <!-- 将统计信息移动到表格上方 -->
+    <div class="stats-summary" id="statsSummary"></div>
+    <table class="stats-table">
+        <thead>
+            <tr>
+                <th>省份</th>
+                <th>城市</th>
+                <th>坐标</th>
+                <th>备注</th>
+            </tr>
+        </thead>
+        <tbody id="statsTableBody"></tbody>
+    </table>
+
+    <script>
+        let allPoints = [];
+        let filteredPoints = [];
+
+        function renderStats(points) {
+            allPoints = points;
+            filteredPoints = [...points];
+            
+            // 填充省份筛选器
+            const provinces = [...new Set(points.map(p => p.province || '未知'))];
+            const provinceSelect = document.getElementById('provinceFilter');
+            provinces.forEach(province => {
+                const option = document.createElement('option');
+                option.value = province;
+                option.textContent = province;
+                provinceSelect.appendChild(option);
+            });
+
+            // 填充城市筛选器
+            updateCityFilter();
+            
+            // 渲染表格
+            updateTable();
+            updateSummary();
+        }
+
+        function updateCityFilter() {
+            const citySelect = document.getElementById('cityFilter');
+            const provinceFilter = document.getElementById('provinceFilter').value;
+            
+            // 清空现有选项
+            citySelect.innerHTML = '<option value="">所有城市</option>';
+            
+            // 根据省份筛选获取城市列表
+            let cities = [];
+            if (provinceFilter) {
+                cities = [...new Set(
+                    allPoints
+                        .filter(p => p.province === provinceFilter)
+                        .map(p => p.name || '未知')
+                )];
+                citySelect.disabled = false;
+                // 重置为"所有城市"
+                citySelect.value = "";
+            } else {
+                citySelect.disabled = true;
+            }
+            
+            // 添加城市选项
+            cities.forEach(city => {
+                const option = document.createElement('option');
+                option.value = city;
+                option.textContent = city;
+                citySelect.appendChild(option);
+            });
+        }
+
+        function filterByProvince() {
+            const provinceFilter = document.getElementById('provinceFilter').value;
+            // 重置城市筛选为"所有城市"
+            document.getElementById('cityFilter').value = "";
+            
+            // 筛选数据
+            filteredPoints = allPoints.filter(point => {
+                return !provinceFilter || point.province === provinceFilter;
+            });
+            
+            updateTable();
+            updateSummary();
+        }
+
+        function filterByCity() {
+            const provinceFilter = document.getElementById('provinceFilter').value;
+            const cityFilter = document.getElementById('cityFilter').value;
+            
+            // 筛选数据
+            filteredPoints = allPoints.filter(point => {
+                const matchProvince = !provinceFilter || point.province === provinceFilter;
+                const matchCity = !cityFilter || point.name === cityFilter;
+                return matchProvince && matchCity;
+            });
+            
+            updateTable();
+            updateSummary();
+        }
+
+        // 修改事件监听
+        document.getElementById('provinceFilter').onchange = function() {
+            updateCityFilter();
+            filterByProvince();
+        };
+        
+        document.getElementById('cityFilter').onchange = filterByCity;
+
+        function filterTable() {
+            const provinceFilter = document.getElementById('provinceFilter').value;
+            const cityFilter = document.getElementById('cityFilter').value;
+            
+            // 更新城市筛选器选项
+            if (provinceFilter) {
+                updateCityFilter();
+                // 只有当城市筛选器启用时才设置值
+                if (!document.getElementById('cityFilter').disabled) {
+                    document.getElementById('cityFilter').value = cityFilter;
+                }
+            }
+            
+            // 筛选数据
+            filteredPoints = allPoints.filter(point => {
+                const matchProvince = !provinceFilter || point.province === provinceFilter;
+                const matchCity = !cityFilter || point.name === cityFilter;
+                return matchProvince && matchCity;
+            });
+            
+            updateTable();
+            updateSummary();
+        }
+
+        function updateTable() {
+            const tbody = document.getElementById('statsTableBody');
+            tbody.innerHTML = '';
+            
+            filteredPoints.forEach(point => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${point.province || ''}</td>
+                    <td>${point.name || ''}</td>
+                    <td>${point.lat.toFixed(4)}, ${point.lon.toFixed(4)}</td>
+                    <td>${point.info || ''}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateSummary() {
+            const provinces = new Set();
+            const cities = new Set();
+            
+            filteredPoints.forEach(point => {
+                if(point.province) provinces.add(point.province);
+                if(point.name) cities.add(point.name);
+            });
+            
+            document.getElementById('statsSummary').textContent = 
+                `共${provinces.size}个省份，${cities.size}个城市`;
+        }
+
+        function closeStats() {
+            window.parent.postMessage({type: 'closeForm'}, '*');
+        }
+
+        window.addEventListener('message', function(event) {
+            if(event.data.type === 'setStatsData') {
+                renderStats(event.data.points);
+            }
+        });
+    </script>
+</body>
+</html>

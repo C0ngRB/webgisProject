@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>旅行足迹地图</title>
+    <!-- Leaflet 样式和主库 -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/marsgis/Leaflet.TileLayer.Baidu/leaflet-tilelayer-baidu.js"></script>
+    <!-- 鼠标坐标插件 -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/ardhi/Leaflet.MousePosition/src/L.Control.MousePosition.css"
+    />
+    <script src="https://cdn.jsdelivr.net/gh/ardhi/Leaflet.MousePosition/src/L.Control.MousePosition.js"></script>
+    <!-- MiniMap 插件 -->
+    <script src="https://unpkg.com/leaflet-minimap@3.6.1/dist/Control.MiniMap.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet-minimap@3.6.1/dist/Control.MiniMap.min.css"
+    />
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+      #map {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      /* 新增控制面板样式 */
+      .control-panel {
+        position: absolute;
+        right: 60px;
+        top: 15px;
+        z-index: 1000;
+        background: transparent;
+        padding: 5px;
+        border-radius: 5px;
+        display: flex;
+        gap: 10px;
+      }
+      .control-btn {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        background: white;
+        color: #12513d;
+        border: none;
+        border-radius: 4px; /* 改为方形圆角 */
+        cursor: pointer;
+        font-size: 16px;
+        line-height: 32px;
+        position: relative;
+        transition: all 0.5s ease;
+      }
+      .control-btn:hover {
+        width: auto;
+        padding: 0 10px;
+        background: #0c3a2a;
+        color: #f0f0f0;
+      }
+      .control-btn:hover::after {
+        content: attr(data-text);
+        margin-left: 5px;
+      }
+
+      .search-box {
+        position: absolute;
+        left: 50%;
+        top: 15px;
+        transform: translateX(-50%);
+        z-index: 1000;
+      }
+      /* 原有搜索框样式保持不变 */
+      .search-container {
+        position: relative;
+        display: inline-block;
+      }
+      .search-input {
+        width: 200px;
+        height: 32px;
+        padding: 0px 30px 0px 10px;
+        border: none;
+        border-radius: 4px;
+        background: white;
+        color: #12513d;
+        font-size: 14px;
+        transition: all 0.5s ease;
+      }
+      .search-input:focus {
+        outline: none;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+      }
+      .search-icon {
+        position: absolute;
+        right: 8px;
+        top: 8px;
+        color: #12513d;
+        cursor: pointer;
+      }
+      .modify-marker {
+        background: none !important;
+        border: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 新增控制面板 -->
+    <!-- 新增独立搜索框 -->
+    <div class="search-box">
+      <div class="search-container">
+        <input type="text" placeholder="搜索..." class="search-input" />
+        <i class="fas fa-search search-icon"></i>
+      </div>
+    </div>
+
+    <!-- 原有控制面板保持不变 -->
+    <div class="control-panel">
+      <button class="control-btn" onclick="addFeature()" data-text="添加">
+        <i class="fas fa-plus-circle"></i>
+      </button>
+      <button class="control-btn" onclick="deleteFeature()" data-text="删除">
+        <i class="fas fa-trash-alt"></i>
+      </button>
+      <button class="control-btn" onclick="queryFeature()" data-text="统计">
+        <i class="fas fa-chart-bar"></i>
+      </button>
+      <button class="control-btn" onclick="modifyFeature()" data-text="修改">
+        <i class="fas fa-edit"></i>
+      </button>
+    </div>
+
+    <!-- 地图容器 -->
+    <div id="map" class="map-container"></div>
+
+    <script>
+      let clickHandler = null; // 用于存储点击事件处理函数
+
+      let modifyMarkers = []; // 存储修改模式的标记
+
+      function clearModifyMarkers() {
+        modifyMarkers.forEach((marker) => map.removeLayer(marker));
+        modifyMarkers = [];
+      }
+
+      function addFeature() {
+        // 清除修改模式的标记
+        clearModifyMarkers();
+        // 关闭所有已存在的表单
+        const existingForms = [
+          document.getElementById("feature-form-container"),
+          document.getElementById("travel-points-table"),
+          document.getElementById("modify-form-container"),
+          document.getElementById("stats-table"),
+          document.getElementById("delete-form-container"),
+        ];
+        existingForms.forEach((form) => {
+          if (form) form.remove();
+        });
+
+        // 创建并显示表单
+        const formContainer = document.createElement("iframe");
+        formContainer.id = "feature-form-container";
+        formContainer.src = "feature-form.html";
+        formContainer.style.position = "absolute";
+        formContainer.style.right = "10px";
+        formContainer.style.top = "60px";
+        formContainer.style.width = "250px";
+        formContainer.style.height = "300px";
+        formContainer.style.border = "none";
+        formContainer.style.borderRadius = "8px";
+        formContainer.style.overflow = "hidden";
+        formContainer.style.zIndex = "1000";
+        document.getElementById("map").appendChild(formContainer);
+
+        // 设置鼠标样式
+        document.getElementById("map").style.cursor = "crosshair";
+
+        // 移除之前的点击事件（如果存在）
+        if (clickHandler) {
+          map.off("click", clickHandler);
+          map.off("mousemove", mouseMoveHandler);
+        }
+
+        // 先定义mouseMoveHandler函数
+        const mouseMoveHandler = function (e) {
+          const coordinates = e.latlng;
+          const form = document.getElementById("feature-form-container");
+          if (form && form.contentWindow) {
+            form.contentWindow.postMessage(
+              {
+                type: "setCoordinates",
+                lat: coordinates.lat,
+                lng: coordinates.lng,
+              },
+              "*"
+            );
+          }
+        };
+
+        // 再定义clickHandler函数
+        clickHandler = function (e) {
+          document.getElementById("map").style.cursor = "";
+          map.off("click", clickHandler);
+          map.off("mousemove", mouseMoveHandler);
+          clickHandler = null;
+        };
+
+        map.on("mousemove", mouseMoveHandler);
+        map.on("click", clickHandler);
+      }
+
+      function deleteFeature() {
+        // 清除修改模式的标记
+        clearModifyMarkers();
+        // 关闭所有已存在的表单
+        const existingForms = [
+          document.getElementById("feature-form-container"),
+          document.getElementById("travel-points-table"),
+          document.getElementById("modify-form-container"),
+          document.getElementById("stats-table"),
+          document.getElementById("delete-form-container"),
+        ];
+        existingForms.forEach((form) => {
+          if (form) form.remove();
+        });
+
+        // 创建删除选择表单
+        const deleteForm = document.createElement("div");
+        deleteForm.id = "delete-form-container";
+        deleteForm.style.position = "absolute";
+        deleteForm.style.right = "10px";
+        deleteForm.style.top = "60px";
+        deleteForm.style.width = "250px";
+        deleteForm.style.height = "120px";
+        deleteForm.style.backgroundColor = "rgba(255,255,255,0.9)";
+        deleteForm.style.padding = "15px";
+        deleteForm.style.borderRadius = "8px";
+        deleteForm.style.zIndex = "1000";
+
+        // 添加单选按钮选择删除类型
+        deleteForm.innerHTML = `
+                <div style="margin-bottom: 15px; text-align: center;">
+                    <span style="color: #12513D; font-weight: bold;">选择删除类型</span>
+                </div>
+                <div style="display: flex; gap: 15px; justify-content: center; margin-bottom: 15px;">
+                    <label style="display: flex; align-items: center; font-size: 13px;">
+                        <input type="radio" name="deleteType" value="point" checked style="margin-right: 5px;">
+                        点
+                    </label>
+                    <label style="display: flex; align-items: center; font-size: 13px;">
+                        <input type="radio" name="deleteType" value="line" style="margin-right: 5px;">
+                        线
+                    </label>
+                </div>
+                <button id="confirmDeleteTypeBtn" style="width: 100%; padding: 5px; background: #12513D; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                    确认
+                </button>
+            `;
+
+        document.getElementById("map").appendChild(deleteForm);
+
+        // 确认按钮点击事件
+        document
+          .getElementById("confirmDeleteTypeBtn")
+          .addEventListener("click", function () {
+            const deleteType = document.querySelector(
+              'input[name="deleteType"]:checked'
+            ).value;
+            deleteForm.remove();
+
+            if (deleteType === "point") {
+              // 原有删除点逻辑
+              fetch("https://webgisproject.onrender.com/searchtravelpoints")
+                .then((response) => response.json())
+                .then((data) => {
+                  const newContainer = document.createElement("iframe");
+                  newContainer.id = "travel-points-table";
+                  newContainer.src = "travel-points-table.html";
+                  newContainer.style.position = "absolute";
+                  newContainer.style.left = "10px";
+                  newContainer.style.top = "80px";
+                  newContainer.style.width = "350px";
+                  newContainer.style.height = "400px";
+                  newContainer.style.border = "none";
+                  newContainer.style.borderRadius = "8px";
+                  newContainer.style.zIndex = "1000";
+
+                  document.getElementById("map").appendChild(newContainer);
+
+                  newContainer.onload = function () {
+                    newContainer.contentWindow.postMessage(
+                      {
+                        type: "setTravelPoints",
+                        points: data,
+                      },
+                      "*"
+                    );
+                  };
+                })
+                .catch((error) => {
+                  console.error("获取数据失败:", error);
+                  alert("获取城市数据失败");
+                });
+            } else if (deleteType === "line") {
+              // 获取路线数据并显示
+              fetch("https://webgisproject.onrender.com/gettravelroutes")
+                .then((response) => response.json())
+                .then((data) => {
+                  const newContainer = document.createElement("iframe");
+                  newContainer.id = "travel-routes-table";
+                  newContainer.src = "travel-routes-table.html";
+                  newContainer.style.position = "absolute";
+                  newContainer.style.left = "10px";
+                  newContainer.style.top = "80px";
+                  newContainer.style.width = "350px";
+                  newContainer.style.height = "400px";
+                  newContainer.style.border = "none";
+                  newContainer.style.borderRadius = "8px";
+                  newContainer.style.zIndex = "1000";
+
+                  document.getElementById("map").appendChild(newContainer);
+
+                  newContainer.onload = function () {
+                    newContainer.contentWindow.postMessage(
+                      {
+                        type: "setTravelRoutes",
+                        routes: data,
+                      },
+                      "*"
+                    );
+                  };
+                })
+                .catch((error) => {
+                  console.error("获取路线数据失败:", error);
+                  alert("获取路线数据失败");
+                });
+            }
+          });
+      }
+
+      // 修改消息监听器部分
+      window.addEventListener("message", function (event) {
+        if (event.data.type === "reloadParentPage") {
+          location.reload();
+        }
+        if (event.data.type === "closeForm") {
+          const featureForm = document.getElementById("feature-form-container");
+          const pointsTable = document.getElementById("travel-points-table");
+          const modifyForm = document.getElementById("modify-form-container");
+          const routesTable = document.getElementById("travel-routes-table");
+          const statsTable = document.getElementById("stats-table");
+          const deleteForm = document.getElementById("delete-form-container");
+
+          if (featureForm) featureForm.remove();
+          if (pointsTable) pointsTable.remove();
+          if (modifyForm) modifyForm.remove();
+          if (routesTable) routesTable.remove();
+          if (statsTable) statsTable.remove();
+          if (deleteForm) deleteForm.remove();
+
+          // 如果收到clearMarkers标志，则清除所有修改标记
+          if (event.data.clearMarkers) {
+            clearModifyMarkers();
+          }
+        }
+        // 在message监听器中修改drawPointsForLine部分
+        if (event.data.type === "drawPointsForLine") {
+          // 清除之前的点
+          clearModifyMarkers();
+
+          // 绘制所有点
+          event.data.points.forEach((point) => {
+            const marker = L.marker([point.lat, point.lon], {
+              icon: L.divIcon({
+                className: "line-point-marker",
+                html: '<div style="background:#12513D;border:2px solid white;border-radius:50%;width:8px;height:8px;"></div>',
+              }),
+            }).addTo(map);
+
+            // 保存标记引用
+            modifyMarkers.push(marker);
+
+            // 点击事件
+            marker.on("click", function () {
+              // 根据选择模式设置高亮颜色
+              const color =
+                currentSelectionMode === "start" ? "#ff0000" : "#0000ff";
+              marker.setIcon(
+                L.divIcon({
+                  className: "line-point-marker",
+                  html: `<div style="background:${color};border:2px solid white;border-radius:50%;width:8px;height:8px;"></div>`,
+                })
+              );
+
+              window.frames["feature-form-container"].contentWindow.postMessage(
+                {
+                  type: "pointSelected",
+                  point: point,
+                  mode: currentSelectionMode,
+                },
+                "*"
+              );
+            });
+          });
+        }
+
+        if (event.data.type === "setSelectionMode") {
+          currentSelectionMode = event.data.mode;
+        }
+      });
+      function queryFeature() {
+        // 清除修改模式的标记
+        clearModifyMarkers();
+        // 关闭所有已存在的表单
+        const existingForms = [
+          document.getElementById("feature-form-container"),
+          document.getElementById("travel-points-table"),
+          document.getElementById("modify-form-container"),
+          document.getElementById("stats-table"),
+          document.getElementById("delete-form-container"),
+        ];
+        existingForms.forEach((form) => {
+          if (form) form.remove();
+        });
+
+        // 获取所有点数据并显示表格
+        fetch("https://webgisproject.onrender.com/searchtravelpoints")
+          .then((response) => response.json())
+          .then((data) => {
+            const statsContainer = document.createElement("iframe");
+            statsContainer.id = "stats-table";
+            statsContainer.src = "stats-table.html";
+            statsContainer.style.position = "absolute";
+            statsContainer.style.right = "10px";
+            statsContainer.style.top = "60px";
+            statsContainer.style.width = "500px";
+            statsContainer.style.height = "400px";
+            statsContainer.style.border = "none";
+            statsContainer.style.borderRadius = "8px";
+            statsContainer.style.zIndex = "1000";
+            document.getElementById("map").appendChild(statsContainer);
+
+            statsContainer.onload = function () {
+              statsContainer.contentWindow.postMessage(
+                {
+                  type: "setStatsData",
+                  points: data,
+                },
+                "*"
+              );
+            };
+          })
+          .catch((error) => {
+            console.error("获取数据失败:", error);
+            alert("获取统计数据失败");
+          });
+      }
+
+      function modifyFeature() {
+        // 清除修改模式的标记
+        clearModifyMarkers();
+        // 关闭所有已存在的表单
+        const existingForms = [
+          document.getElementById("feature-form-container"),
+          document.getElementById("travel-points-table"),
+          document.getElementById("modify-form-container"),
+          document.getElementById("stats-table"),
+          document.getElementById("delete-form-container"),
+        ];
+        existingForms.forEach((form) => {
+          if (form) form.remove();
+        });
+
+        // 获取所有点数据
+        fetch("https://webgisproject.onrender.com/searchtravelpoints")
+          .then((response) => response.json())
+          .then((data) => {
+            // 在地图上显示所有点
+            data.forEach((point) => {
+              const marker = L.marker([point.lat, point.lon], {
+                icon: L.divIcon({
+                  className: "modify-marker",
+                  html: '<div style="background:#12513D;border:2px solid white;border-radius:50%;width:8px;height:8px;"></div>',
+                }),
+              }).addTo(map);
+
+              // 保存标记引用
+              modifyMarkers.push(marker);
+
+              // 点击标记时显示修改表单
+              marker.on("click", function () {
+                // 清除其他所有修改标记
+                modifyMarkers.forEach((m) => {
+                  if (m !== marker) {
+                    // 只删除不是当前点击的标记
+                    map.removeLayer(m);
+                  }
+                });
+
+                // 更新modifyMarkers数组，只保留当前点击的标记
+                modifyMarkers = [marker];
+
+                // 显示修改表单
+                const formContainer = document.createElement("iframe");
+                formContainer.id = "modify-form-container";
+                formContainer.src = "modify-form.html";
+                formContainer.style.position = "absolute";
+                formContainer.style.right = "10px";
+                formContainer.style.top = "60px";
+                formContainer.style.width = "250px";
+                formContainer.style.height = "300px";
+                formContainer.style.border = "none";
+                formContainer.style.borderRadius = "8px";
+                formContainer.style.overflow = "hidden";
+                formContainer.style.zIndex = "1000";
+                document.getElementById("map").appendChild(formContainer);
+
+                formContainer.onload = function () {
+                  formContainer.contentWindow.postMessage(
+                    {
+                      type: "setModifyData",
+                      point: point,
+                    },
+                    "*"
+                  );
+                };
+              });
+            });
+          });
+      }
+
+      // 添加全局变量存储标记
+      let clickMarkers = {};
+
+      // 在message监听器中添加
+      window.addEventListener("message", function (event) {
+        if (event.data.type === "reloadParentPage") {
+          location.reload();
+        }
+        if (event.data.type === "closeForm") {
+          clearModifyMarkers();
+          const formContainer = document.getElementById("travel-points-table");
+          if (formContainer) formContainer.remove();
+        }
+
+        if (event.data.type === "addMarker") {
+          const marker = L.marker(
+            [event.data.marker.lat, event.data.marker.lng],
+            {
+              icon: L.divIcon({
+                className: "click-marker",
+                html: '<div style="background:#12513D;border:2px solid white;border-radius:50%;width:12px;height:12px;"></div>',
+              }),
+            }
+          ).addTo(map);
+          clickMarkers[event.data.marker._leaflet_id] = marker;
+        }
+
+        if (event.data.type === "removeMarker") {
+          if (clickMarkers[event.data.markerId]) {
+            map.removeLayer(clickMarkers[event.data.markerId]);
+            delete clickMarkers[event.data.markerId];
+          }
+        }
+      });
+    </script>
+    <script>
+      // 创建底图图层
+      const osm = L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+          maxZoom: 18,
+          attribution: "© OpenStreetMap",
+        }
+      );
+
+      const osm_miniMap = L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+          maxZoom: 18,
+          attribution: "© OpenStreetMap",
+        }
+      );
+
+      const esri = L.tileLayer(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        {
+          maxZoom: 18,
+          zoom: 4,
+          attribution: "© Esri & contributors",
+        }
+      );
+
+      // 初始化地图
+      let map = L.map("map", {
+        center: [30.67, 114.06], // 示例中心：武汉
+        zoom: 4,
+        layers: [esri],
+      });
+
+      // 添加GeoServer图层
+      const travelRouteLayer = L.tileLayer
+        .wms("http://localhost:8084/geoserver/topp/wms", {
+          layers: "topp:travelroute1", // 图层名称
+          format: "image/png",
+          transparent: true,
+          attribution: "travelroute",
+        })
+        .addTo(map);
+
+      const travelPointLayer = L.tileLayer
+        .wms("http://localhost:8084/geoserver/topp/wms", {
+          layers: "topp:travelpoint", // 图层名称
+          format: "image/png",
+          transparent: true,
+          attribution: "travelpoint",
+        })
+        .addTo(map);
+
+      // 图层控制器
+      const baseMaps = {
+        OpenStreetMap: osm,
+        卫星地图: esri,
+      };
+
+      let overlays = {
+        足迹路线: travelRouteLayer,
+        城市中心: travelPointLayer,
+      };
+
+      L.control.layers(baseMaps, overlays).addTo(map);
+
+      // 鼠标坐标显示
+      L.control
+        .mousePosition({
+          position: "bottomleft",
+          separator: " , ",
+          numDigits: 5,
+          prefix: "坐标：",
+        })
+        .addTo(map);
+
+      // 鹰眼地图（MiniMap）
+      const miniMap = new L.Control.MiniMap(osm_miniMap, {
+        zoomLevelOffset: -4,
+        toggleDisplay: true,
+        minimized: false,
+      }).addTo(map);
+
+      // 添加比例尺控件
+      L.control.scale().addTo(map);
+    </script>
+  </body>
+</html>
+<script>
+  // 在脚本开头添加变量
+  let searchMarkers = []; // 存储搜索结果标记
+  let currentSelectionMode = "start"; // 用于
+  // 在页面加载完成后添加搜索事件监听
+  document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.querySelector(".search-input");
+    const searchIcon = document.querySelector(".search-icon");
+
+    // 搜索函数
+    const performSearch = () => {
+      const searchText = searchInput.value.trim();
+      if (!searchText) return;
+
+      // 清除之前的搜索结果
+      searchMarkers.forEach((marker) => map.removeLayer(marker));
+      searchMarkers = [];
+
+      // 发送搜索请求
+      fetch(
+        `https://webgisproject.onrender.com/searchtravelpoints?name=${encodeURIComponent(
+          searchText
+        )}`
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.length === 0) {
+            alert("未找到匹配结果");
+            return;
+          }
+
+          // 在地图上添加标记
+          data.forEach((point) => {
+            const popupContent = `
+                        <div style="min-width: 150px">
+                            <div><b>省份:</b> ${point.province || "未知"}</div>
+                            <div><b>城市:</b> ${point.name || "未知"}</div>
+                            <div><b>坐标:</b> ${point.lat.toFixed(
+                              4
+                            )}, ${point.lon.toFixed(4)}</div>
+                            ${
+                              point.info
+                                ? `<div><b>备注:</b> ${point.info}</div>`
+                                : ""
+                            }
+                        </div>
+                    `;
+            const marker = L.marker([point.lat, point.lon])
+              .addTo(map)
+              .bindPopup(popupContent);
+
+            // 添加点击事件，将视图移动到标记中心
+            marker.on("click", function () {
+              map.setView([point.lat, point.lon], map.getZoom());
+            });
+
+            searchMarkers.push(marker);
+          });
+
+          // 自动缩放到包含所有标记的视图
+        })
+        .catch((error) => {
+          console.error("搜索失败:", error);
+          alert("搜索失败");
+        });
+    };
+
+    // 点击搜索图标事件
+    searchIcon.addEventListener("click", performSearch);
+
+    // 回车键事件
+    searchInput.addEventListener("keypress", function (e) {
+      if (e.key === "Enter") {
+        performSearch();
+      }
+    });
+  });
+
+  // ... 其余代码保持不变 ...
+</script>
+<script>
+  // 显示修改表单
+  function showModifyForm(pointData) {
+    const formContainer = document.createElement("div");
+    formContainer.id = "modify-form-container";
+    formContainer.style.position = "absolute";
+    formContainer.style.right = "10px";
+    formContainer.style.top = "60px";
+    formContainer.style.width = "250px";
+    formContainer.style.height = "300px";
+    formContainer.style.backgroundColor = "white";
+    formContainer.style.padding = "15px";
+    formContainer.style.borderRadius = "8px";
+    formContainer.style.zIndex = "1000";
+
+    document.getElementById("map").appendChild(formContainer);
+
+    // 确定按钮点击事件
+    document
+      .getElementById("modifySubmitBtn")
+      .addEventListener("click", function () {
+        const updatedData = {
+          gid: pointData.gid,
+          province: document.getElementById("modifyProvinceInput").value,
+          name: document.getElementById("modifyCityInput").value,
+          info: document.getElementById("modifyNoteInput").value,
+          lat: pointData.lat,
+          lon: pointData.lon,
+        };
+
+        // 调用修改API
+        fetch("https://webgisproject.onrender.com/updatetravelpoint", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedData),
+        })
+          .then((response) => {
+            if (!response.ok) throw new Error("修改失败");
+            return response.json();
+          })
+          .then(() => {
+            alert("修改成功");
+            location.reload();
+          })
+          .catch((error) => {
+            console.error("修改失败:", error);
+            alert("修改失败");
+          });
+      });
+
+    // 取消按钮点击事件
+    document
+      .getElementById("modifyCancelBtn")
+      .addEventListener("click", function () {
+        formContainer.remove();
+      });
+  }
+</script>

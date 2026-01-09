@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      body {
+        margin: 0;
+        padding: 10px;
+        font-family: Arial, sans-serif;
+        font-size: 10px; /* 缩小字号 */
+        background-color: rgba(255, 255, 255, 0.8); /* 白色80%透明 */
+      }
+      .point-form {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        height: 100%;
+        background-color: transparent; /* 确保表单背景透明 */
+      }
+      .point-item {
+        display: flex;
+        align-items: center;
+        padding: 8px;
+        border-bottom: 1px solid #eee;
+      }
+      .point-item input[type="checkbox"] {
+        margin-right: 10px;
+      }
+      .button-group {
+        display: flex;
+        justify-content: center; /* 改为居中 */
+        gap: 40px; /* 添加按钮间距 */
+        margin-top: auto;
+        padding-top: 10px;
+      }
+      .delete-btn,
+      .cancel-btn {
+        padding: 8px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 120px; /* 统一宽度 */
+      }
+      .delete-btn {
+        background-color: #12513d;
+        color: white;
+      }
+      .cancel-btn {
+        background-color: #ccc;
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="point-form">
+      <div id="pointsContainer"></div>
+      <div class="button-group">
+        <button class="delete-btn" onclick="deleteSelected()">删除选中</button>
+        <button class="cancel-btn" id="cancelBtn">取消</button>
+      </div>
+    </div>
+
+    <script>
+      let pointsData = [];
+
+      window.addEventListener("message", function (event) {
+        if (event.data.type === "setTravelPoints") {
+          pointsData = Array.isArray(event.data.points)
+            ? event.data.points
+            : [];
+          renderPoints();
+        }
+      });
+
+      function renderPoints() {
+        const container = document.getElementById("pointsContainer");
+        container.innerHTML = "";
+
+        pointsData.forEach((point, index) => {
+          const item = document.createElement("div");
+          item.className = "point-item";
+          item.innerHTML = `
+                    <input type="checkbox" id="point-${index}" data-gid="${
+            point.gid
+          }">
+                    <label for="point-${index}">
+                        省份：${point.province || "未知"}，城市：${point.name}
+                        <br>
+                        纬度：${point.lat.toFixed(
+                          4
+                        )}，经度：${point.lon.toFixed(4)}
+                        ${point.info ? `<br>备注：${point.info}` : ""}
+                    </label>
+                `;
+          container.appendChild(item);
+        });
+      }
+
+      // 在页面加载完成后执行
+
+      // 修复closeForm函数
+      document
+        .getElementById("cancelBtn")
+        .addEventListener("click", function () {
+          window.parent.postMessage({ type: "closeForm" }, "*");
+        });
+      function deleteSelected() {
+        // 重新获取数据
+        fetch("https://webgisproject.onrender.com/searchtravelpoints")
+          .then((response) => response.json())
+          .then((data) => {
+            pointsData = data;
+
+            const selectedGids = Array.from(
+              document.querySelectorAll('input[type="checkbox"]:checked')
+            ).map((checkbox) => checkbox.dataset.gid);
+
+            if (selectedGids.length === 0) {
+              alert("请至少选择一个要删除的城市");
+              return;
+            }
+
+            Promise.all(
+              selectedGids.map((gid) =>
+                fetch("https://webgisproject.onrender.com/deletetravelpoint", {
+                  method: "DELETE",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({ gid: gid }),
+                }).then((response) => {
+                  if (!response.ok) {
+                    throw new Error(`删除失败: HTTP ${response.status}`);
+                  }
+                  return response.json();
+                })
+              )
+            )
+              // 删除成功后的处理逻辑
+              .then(() => {
+                alert("删除成功");
+                try {
+                  // 发送刷新父页面消息
+                  window.parent.postMessage(
+                    {
+                      type: "reloadParentPage",
+                    },
+                    "*"
+                  );
+                  // 发送关闭表单消息
+                  window.parent.postMessage(
+                    {
+                      type: "closeForm",
+                    },
+                    "*"
+                  );
+                } catch (e) {
+                  console.warn("通知父窗口失败:", e);
+                  location.reload();
+                }
+              })
+              .catch((error) => {
+                console.error("删除过程中出错:", error);
+                alert("部分删除操作可能未完成");
+              });
+          })
+          .catch((error) => {
+            console.error("获取数据失败:", error);
+            alert("获取城市数据失败");
+          });
+      }
+    </script>
+  </body>
+</html>

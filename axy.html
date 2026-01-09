@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>安小丫的个人网页</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav id="navbar">   
+        <div class="container">
+            <div class="nav-content">
+                <div class="nav-links">
+                    <!-- 超链接，href="#home" 表示点击后会跳转到页面中id="home"的部分（即首页区域） -->
+                    <a href="#home">首页</a>
+                    <a href="#about">个人介绍</a>
+                    <a href="#travel">旅行足迹</a>
+                    <a href="#courses">专业课程</a>
+                    <a href="#honor">竞赛经历</a>
+                    <a href="#books">阅读书籍</a>                    
+                </div>
+                <div class="mobile-menu">
+                    <!-- 用于在移动设备上显示或隐藏导航菜单的按钮 -->
+                    <button id="mobile-menu-button">
+                        <svg viewBox="0 0 24 24" stroke="currentColor">
+                            <path d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 首页区域 -->
+    <section id="home">
+        <div class="bg-carousel">   
+            <!-- .active 类，表示它最初是可见的。 -->
+            <img src="image/武大背景1.jpg" class="carousel-image active" alt="背景图1"> 
+            <img src="image/武大背景2.jpg" class="carousel-image" alt="背景图2">
+            <img src="image/武大背景3.jpg" class="carousel-image" alt="背景图3">
+            <img src="image/武大背景4.jpg" class="carousel-image" alt="背景图4">
+            <img src="image/武大背景5.jpg" class="carousel-image" alt="背景图5">
+            <img src="image/武大背景6.jpg" class="carousel-image" alt="背景图6">
+        </div>
+        <div class="container">
+            <h1>欢迎来到我的主页！</h1>
+            <p>探索知识，记录旅程，沉淀成长，在此书写生活与热爱</p>
+        </div>
+    </section>
+
+    <!-- 个人介绍区域 -->
+    <section id="about">
+        <div class="container">
+            <div class="section-header">
+                <h2>个人介绍</h2>     <!-- 使用二级标题 -->
+                <div class="divider"></div>
+                <p>自我画像：展示个人基本信息</p>   <!-- 使用段落标签 -->
+            </div>
+            <div class="about-content">
+                <div class="about-image">
+                    <img src="image/安小丫.jpg" alt="我的照片">
+                </div>
+                <div class="about-text">
+                    <div class="info-item">
+                        <i class="fas fa-user"></i>
+                        <span>姓名：安小丫</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-birthday-cake"></i>
+                        <span>出生年月：2005.03.19</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>籍贯：甘肃武威</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-flag"></i>
+                        <span>政治面貌：共青团员</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-university"></i>
+                        <span>学校：武汉大学</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-school"></i>
+                        <span>学院：资源与环境科学学院</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span>年级：2023级</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-code"></i>
+                        <span>专业：地信制图</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-phone"></i>
+                        <span>电话：1375281818</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-envelope"></i>
+                        <span>邮箱：1375281818@qq.com</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>MBTI：INFJ</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-heart"></i>
+                        <span>兴趣爱好：拼豆、针织、编手链</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-quote-left"></i>
+                        <span>不要温和地走进那个良夜</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 旅行区域 -->
+    <section id="travel">
+        <div class="container">
+            <div class="section-header">
+                <h2>我的旅行足迹</h2>
+                <div class="divider"></div>
+                <p>行万里路，体验不同地方的风土人情</p>
+            </div>           
+            <!-- 使用iframe嵌入地图容器 -->
+            <iframe src="map-container.html" frameborder="0" class="map-container"></iframe>
+        </div>
+            <!-- <div class="travel-cards">
+                <div class="travel-card">
+                    <div class="travel-card-image">
+                         <img src="image/北海.jpg" class="travel-image" alt="北海"> 
+                    </div>
+                    <div class="card-body">
+                        <h3>北海</h3>
+                        <p>北海是我的家乡，一个充满魅力的海滨城市，这里的生活悠闲舒适，滨海风情闻名遐迩。</p>
+                        <a href="https://baike.baidu.com/item/%E5%8C%97%E6%B5%B7%E5%B8%82/5104954" class="details-btn" target="_blank"> 查看详情 </a>                                           
+                    </div>                   
+                </div>
+                <div class="travel-card">
+                    <div class="travel-card-image">
+                         <img src="image/南宁.jpg" class="travel-image" alt="南宁"> 
+                    </div>
+                    <div class="card-body">
+                        <h3>南宁</h3>
+                        <p>南宁具有秀美的自然景观和丰富的多元文化，让我体验到了南国绿城独特的民族风情。</p>
+                        <a href="https://baike.baidu.com/item/%E5%8D%97%E5%AE%81%E5%B8%82/215945" class="details-btn" target="_blank"> 查看详情 </a>
+                    </div>
+                </div>
+                <div class="travel-card">
+                    <div class="travel-card-image">
+                         <img src="image/武汉.jpg" class="travel-image" alt="武汉"> 
+                    </div>
+                    <div class="card-body">
+                        <h3>武汉</h3>
+                        <p>武汉是我的大学所在地，这座江城的人民豪迈热情，风光秀丽。</p>
+                        <a href="https://baike.baidu.com/item/%E6%AD%A6%E6%B1%89%E5%B8%82/195165" class="details-btn" target="_blank"> 查看详情 </a>                                           
+                    </div>
+                </div>
+                <div class="travel-card">
+                    <div class="travel-card-image">
+                         <img src="image/宜昌.jpg" class="travel-image" alt="宜昌"> 
+                    </div>
+                    <div class="card-body">
+                        <h3>宜昌</h3>
+                        <p>探索宜昌，我被这里的自然美景和工程奇迹深深震撼。</p>
+                        <a href="https://baike.baidu.com/item/%E5%AE%9C%E6%98%8C%E5%B8%82/1436958" class="details-btn" target="_blank"> 查看详情 </a>
+                    </div>
+                </div>
+                <div class="travel-card">
+                    <div class="travel-card-image">
+                         <img src="image/广州.jpg" class="travel-image" alt="广州"> 
+                    </div>
+                    <div class="card-body">
+                        <h3>广州</h3>
+                        <p>广州是座南国花城，这里繁华的商业和美食文化深深吸引着我。</p>
+                        <a href="https://baike.baidu.com/item/%E5%B9%BF%E5%B7%9E%E5%B8%82/21808" class="details-btn" target="_blank"> 查看详情 </a>
+                    </div>
+                </div>
+                <div class="travel-card">
+                    <div class="travel-card-image">
+                         <img src="image/上海.jpg" class="travel-image" alt="上海"> 
+                    </div>
+                    <div class="card-body">
+                        <h3>上海</h3>
+                        <p>我曾来到上海进行社会实践调研，这座国际化大都市摩天林立、霓虹璀璨，是中国重要的金融枢纽。</p>
+                        <a href="https://baike.baidu.com/item/%E4%B8%8A%E6%B5%B7%E5%B8%82/127743" class="details-btn" target="_blank"> 查看详情 </a>
+                    </div>
+                </div>
+                <div class="travel-card">
+                    <div class="travel-card-image">
+                         <img src="image/北京.jpg" class="travel-image" alt="北京"> 
+                    </div>
+                    <div class="card-body">
+                        <h3>北京</h3>
+                        <p>北京是我的研学之地，作为我国首都，不仅有着深厚的历史与文化底蕴，也有着现代化的都市风貌。</p>
+                        <a href="https://baike.baidu.com/item/%e5%8c%97%e4%ba%ac%e5%b8%82/126069" class="details-btn" target="_blank"> 查看详情 </a>
+                    </div>
+                </div>
+                <div class="travel-card">
+                    <div class="travel-card-image">
+                         <img src="image/海口.jpg" class="travel-image" alt="海口"> 
+                    </div>
+                    <div class="card-body">
+                        <h3>海口</h3>
+                        <p>海口以悠闲的生活和美丽的海滩著称，这里的热带风情和海鲜美食让我印象深刻。</p>
+                        <a href="https://baike.baidu.com/item/%E6%B5%B7%E5%8F%A3%E5%B8%82/62398615" class="details-btn" target="_blank"> 查看详情 </a>
+                    </div>
+                </div>
+                <div class="travel-card">
+                    <div class="travel-card-image">
+                         <img src="image/三亚.jpg" class="travel-image" alt="三亚"> 
+                    </div>
+                    <div class="card-body">
+                        <h3>三亚</h3>
+                        <p>三亚因清澈的海水、细腻的沙滩和丰富的海洋活动而闻名，是阳光、沙滩和海浪的代名词。</p>
+                        <a href="https://baike.baidu.com/item/%E4%B8%89%E4%BA%9A%E5%B8%82/9374780" class="details-btn" target="_blank"> 查看详情 </a>
+                    </div>
+                </div>
+                <div class="travel-card">
+                    <div class="travel-card-image">
+                         <img src="image/景德镇.jpg" class="travel-image" alt="景德镇"> 
+                    </div>
+                    <div class="card-body">
+                        <h3>景德镇</h3>
+                        <p>景德镇是中国瓷都，以传统工艺和丰富的陶瓷文化著称，让我体会到中国陶瓷的悠久历史。</p>
+                        <a href="https://baike.baidu.com/item/%E6%99%AF%E5%BE%B7%E9%95%87%E5%B8%82/3435898" class="details-btn" target="_blank"> 查看详情 </a>
+                    </div>
+                </div>
+                <div class="travel-card">
+                    <div class="travel-card-image">
+                         <img src="image/南京.jpg" class="travel-image" alt="南京"> 
+                    </div>
+                    <div class="card-body">
+                        <h3>南京</h3>
+                        <p>南京，这座六朝古都，让我感受到历史韵味与现代气息的完美融合。</p>
+                        <a href="https://baike.baidu.com/item/%E5%8D%97%E4%BA%AC%E5%B8%82/2207627" class="details-btn" target="_blank"> 查看详情 </a>
+                    </div>
+                </div>
+                <div class="travel-card">
+                    <div class="travel-card-image">
+                         <img src="image/苏州.jpg" class="travel-image" alt="苏州"> 
+                    </div>
+                    <div class="card-body">
+                        <h3>苏州</h3>
+                        <p>苏州以古典园林和诗意生活著称，我切实领略到江南水乡的古典美。</p>
+                        <a href="https://baike.baidu.com/item/%E8%8B%8F%E5%B7%9E%E5%B8%82/6743370" class="details-btn" target="_blank"> 查看详情 </a>
+                    </div>
+                </div>
+            </div> -->
+        </div>
+    </section>
+    
+    <!-- 专业课程区域 -->
+    <section id="courses">
+        <div class="container">
+            <div class="section-header">
+                <h2>我的专业课程</h2>
+                <div class="divider"></div>
+                <p>地信制图：深耕核心课程的专业领域</p>
+            </div>
+            <div class="course-categories">
+                <button data-category="all" id="show-courses" class="active">核心专业课程</button>
+                <button data-category="major" id="show-chart">课程成绩分析</button>
+            </div>
+            
+            <!-- 课程内容容器 -->
+            <div id="course-content">
+                <div class="course-cards">
+                    <div class="course-grid">
+                        <div class="course-card" id="course-1">
+                            <div class="course-header">
+                                <div class="course-icon">📚</div>
+                                <h3 class="course-title"></h3>
+                            </div>
+                            <p class="course-description"></p>
+                            <div class="course-info">
+                                <span class="course-credit"></span>
+                                <span class="course-grade"></span>
+                            </div>
+                        </div>
+                        <div class="course-card" id="course-2">
+                            <div class="course-header">
+                                <div class="course-icon">📚</div>
+                                <h3 class="course-title"></h3>
+                            </div>
+                            <p class="course-description"></p>
+                            <div class="course-info">
+                                <span class="course-credit"></span>
+                                <span class="course-grade"></span>
+                            </div>
+                        </div>
+                        <div class="course-card" id="course-3">
+                            <div class="course-header">
+                                <div class="course-icon">📚</div>
+                                <h3 class="course-title"></h3>
+                            </div>
+                            <p class="course-description"></p>
+                            <div class="course-info">
+                                <span class="course-credit"></span>
+                                <span class="course-grade"></span>
+                            </div>
+                        </div>
+                        <div class="course-card" id="course-4">
+                            <div class="course-header">
+                                <div class="course-icon">📚</div>
+                                <h3 class="course-title"></h3>
+                            </div>
+                            <p class="course-description"></p>
+                            <div class="course-info">
+                                <span class="course-credit"></span>
+                                <span class="course-grade"></span>
+                            </div>
+                        </div>
+                        <div class="course-card" id="course-5">
+                            <div class="course-header">
+                                <div class="course-icon">📚</div>
+                                <h3 class="course-title"></h3>
+                            </div>
+                            <p class="course-description"></p>
+                            <div class="course-info">
+                                <span class="course-credit"></span>
+                                <span class="course-grade"></span>
+                            </div>
+                        </div>
+                        <div class="course-card" id="course-6">
+                            <div class="course-header">
+                                <div class="course-icon">📚</div>
+                                <h3 class="course-title"></h3>
+                            </div>
+                            <p class="course-description"></p>
+                            <div class="course-info">
+                                <span class="course-credit"></span>
+                                <span class="course-grade"></span>
+                            </div>
+                        </div>
+                        <div class="course-card" id="course-7">
+                            <div class="course-header">
+                                <div class="course-icon">📚</div>
+                                <h3 class="course-title"></h3>
+                            </div>
+                            <p class="course-description"></p>
+                            <div class="course-info">
+                                <span class="course-credit"></span>
+                                <span class="course-grade"></span>
+                            </div>
+                        </div>
+                        <div class="course-card" id="course-8">
+                            <div class="course-header">
+                                <div class="course-icon">📚</div>
+                                <h3 class="course-title"></h3>
+                            </div>
+                            <p class="course-description"></p>
+                            <div class="course-info">
+                                <span class="course-credit"></span>
+                                <span class="course-grade"></span>
+                            </div>
+                        </div>
+                    </div>                
+                </div>
+                <!-- 翻页按钮 -->
+                <div class="pagination">
+                    <button id="prev-page" style="margin-right: 1rem;">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <span class="page-indicator">第1页</span>
+                    <button id="next-page" style="margin-left: 1rem;">
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ECharts图表容器 -->
+        <div id="course-chart" style="width: 100%; height: 30rem; display: none;"></div>
+        </div>
+    </section>
+
+    <!-- 竞赛经历区域 -->
+    <section id="honor">
+        <div class="container">
+            <div class="section-header">
+                <h2>我的个人经历</h2>
+                <div class="divider"></div>
+                <p>积累经验：锤炼专业技能的实战智慧</p>
+            </div>
+            <div class="honor-categories">
+                <button data-category="all" id="competitions" class="active">竞赛经历</button>
+                <button data-category="major" id="honors">个人荣誉</button>
+            </div>
+            
+            <!-- 竞赛经历内容 -->
+            <div id="competitions-content">
+                <div class="timeline">
+
+                    <!-- 2025-12 -->
+                    <div class="timeline-item">
+                    <div class="timeline-date">2025年12月</div>
+                    <div class="timeline-content">
+                        <h3>国家奖学金</h3>
+                        <p class="award">国家级</p>
+                        <p class="info">大二学年综合表现突出，获评国家奖学金。国家奖学金由中央政府出资设立，用于奖励特别优秀的学生。</p>
+                    </div>
+                    </div>
+
+                    <!-- 2025-11 -->
+                    <div class="timeline-item">
+                    <div class="timeline-date">2025年11月</div>
+                    <div class="timeline-content">
+                        <h3>第一届大学生遥感学科数智创新大赛</h3>
+                        <p class="award">国家级一等奖</p>
+                        <p class="info">参与“遥感助农”项目，获国家级一等奖。该赛事由武汉大学主办，面向全国高校，推动遥感与智能技术融合的大学生实践竞赛。</p>
+                    </div>
+                    </div>
+
+                    <!-- 2025-10 -->
+                    <div class="timeline-item">
+                    <div class="timeline-date">2025年10月</div>
+                    <div class="timeline-content">
+                        <h3>中国国际大学生创新大赛（2025）</h3>
+                        <p class="award">国家级铜奖</p>
+                        <p class="info">参与“遥感助农”项目，获国家级铜奖。赛事由教育部等中央部委与地方政府联合主办，旨在推动创新教育与实践转化，鼓励学生以知识解决真实问题。</p>
+                    </div>
+                    </div>
+
+                    <!-- 2025-09 (按你给的新口径替换原“优秀学生甲等奖学金”) -->
+                    <div class="timeline-item">
+                    <div class="timeline-date">2025年9月</div>
+                    <div class="timeline-content">
+                        <h3>国家励志奖学金</h3>
+                        <p class="award">国家级</p>
+                        <p class="info">大二学年综合表现突出，获评国家励志奖学金。</p>
+                    </div>
+                    </div>
+
+                    <div class="timeline-item">
+                    <div class="timeline-date">2025年9月</div>
+                    <div class="timeline-content">
+                        <h3>优秀学生奖学金</h3>
+                        <p class="award">校级</p>
+                        <p class="info">大二学年综合表现突出，获评优秀学生奖学金。</p>
+                    </div>
+                    </div>
+
+                    <div class="timeline-item">
+                    <div class="timeline-date">2025年9月</div>
+                    <div class="timeline-content">
+                        <h3>三好学生</h3>
+                        <p class="award">校级</p>
+                        <p class="info">德智体全面发展，获得“三好学生”称号。</p>
+                    </div>
+                    </div>
+
+                    <div class="timeline-item">
+                    <div class="timeline-date">2025年9月</div>
+                    <div class="timeline-content">
+                        <h3>优秀共青团员</h3>
+                        <p class="award">校级</p>
+                        <p class="info">热爱祖国，学习认真，获得“优秀共青团员”称号。</p>
+                    </div>
+                    </div>
+
+                    
+
+                    <!-- 2024-09 -->
+                    <div class="timeline-item">
+                    <div class="timeline-date">2024年9月</div>
+                    <div class="timeline-content">
+                        <h3>国家励志奖学金</h3>
+                        <p class="award">国家级</p>
+                        <p class="info">大一学年综合表现突出，获评国家励志奖学金。</p>
+                    </div>
+                    </div>
+
+                    <div class="timeline-item">
+                    <div class="timeline-date">2024年9月</div>
+                    <div class="timeline-content">
+                        <h3>优秀学生奖学金</h3>
+                        <p class="award">校级</p>
+                        <p class="info">大一学年综合表现突出，获评优秀学生奖学金。</p>
+                    </div>
+                    </div>
+
+                    <!-- 2024-05 -->
+                    <div class="timeline-item">
+                    <div class="timeline-date">2024年5月</div>
+                    <div class="timeline-content">
+                        <h3>优秀学生干部</h3>
+                        <p class="award">校级</p>
+                        <p class="info">作为学习委员积极服务同学，获得“优秀学生干部”称号。</p>
+                    </div>
+                    </div>
+
+                </div>
+                </div>
+
+
+ 
+    <!-- 书籍区域 -->
+    <section id="books">
+        <div class="container">
+            <div class="section-header">
+            <h2>读过的书籍</h2>
+            <div class="divider"></div>
+            <p>读万卷书：领略古今中外的文化魅力</p>
+            </div>
+
+            <div class="book-cards">
+            <!-- 2025 -->
+            <div class="book-card">
+                <img src="image/在细雨中呼喊.jpg" alt="在细雨中呼喊">
+                <div class="card-body">
+                <h3>在细雨中呼喊</h3>
+                <div class="author">作者: 余华</div>
+                <div class="tags">
+                    <span class="tag">记忆</span>
+                    <span class="tag">命运</span>
+                </div>
+                <a href="https://baike.baidu.com/item/%E5%9C%A8%E7%BB%86%E9%9B%A8%E4%B8%AD%E5%91%BC%E5%96%8A" class="details-btn" target="_blank">查看详情</a>
+                </div>
+            </div>
+
+            <!-- 2024 -->
+            <div class="book-card">
+                <img src="image/嫌疑人X的献身.jpg" alt="嫌疑人X的献身">
+                <div class="card-body">
+                <h3>嫌疑人X的献身</h3>
+                <div class="author">作者: 东野圭吾</div>
+                <div class="tags">
+                    <span class="tag">逻辑献身</span>
+                    <span class="tag">爱情悲剧</span>
+                </div>
+                <a href="https://baike.baidu.com/item/%E5%AB%8C%E7%96%91%E4%BA%BAX%E7%9A%84%E7%8C%AE%E8%BA%AB" class="details-btn" target="_blank">查看详情</a>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <img src="image/人间椅子.jpg" alt="人间椅子">
+                <div class="card-body">
+                <h3>人间椅子</h3>
+                <div class="author">作者: 江户川乱步</div>
+                <div class="tags">
+                    <span class="tag">猎奇</span>
+                    <span class="tag">暗恋</span>
+                </div>
+                <a href="https://baike.baidu.com/item/%E4%BA%BA%E9%97%B4%E6%A4%85%E5%AD%90" class="details-btn" target="_blank">查看详情</a>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <img src="image/天使与魔鬼.jpg" alt="天使与魔鬼">
+                <div class="card-body">
+                <h3>天使与魔鬼</h3>
+                <div class="author">作者: 丹·布朗</div>
+                <div class="tags">
+                    <span class="tag">梵蒂冈</span>
+                    <span class="tag">科学与宗教</span>
+                </div>
+                <a href="https://baike.baidu.com/item/%E5%A4%A9%E4%BD%BF%E4%B8%8E%E9%AD%94%E9%AC%BC" class="details-btn" target="_blank">查看详情</a>
+                </div>
+            </div>
+
+            <!-- 2023 -->
+            <div class="book-card">
+                <img src="image/达·芬奇密码.jpg" alt="达·芬奇密码">
+                <div class="card-body">
+                <h3>达·芬奇密码</h3>
+                <div class="author">作者: 丹·布朗</div>
+                <div class="tags">
+                    <span class="tag">圣杯</span>
+                    <span class="tag">艺术史</span>
+                </div>
+                <a href="https://baike.baidu.com/item/%E8%BE%BE%C2%B7%E8%8A%AC%E5%A5%87%E5%AF%86%E7%A0%81" class="details-btn" target="_blank">查看详情</a>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <img src="image/地狱.jpg" alt="地狱">
+                <div class="card-body">
+                <h3>地狱</h3>
+                <div class="author">作者: 丹·布朗</div>
+                <div class="tags">
+                    <span class="tag">但丁</span>
+                    <span class="tag">末日危机</span>
+                </div>
+                <a href="https://baike.baidu.com/item/%E5%9C%B0%E7%8B%B1" class="details-btn" target="_blank">查看详情</a>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <img src="image/失落的秘符.jpg" alt="失落的秘符">
+                <div class="card-body">
+                <h3>失落的秘符</h3>
+                <div class="author">作者: 丹·布朗</div>
+                <div class="tags">
+                    <span class="tag">符号学</span>
+                    <span class="tag">华盛顿</span>
+                </div>
+                <a href="https://baike.baidu.com/item/%E5%A4%B1%E8%90%BD%E7%9A%84%E7%A7%98%E7%AC%A6" class="details-btn" target="_blank">查看详情</a>
+                </div>
+            </div>
+
+            <!-- 2022 -->
+            <div class="book-card">
+                <img src="image/第七天.jpg" alt="第七天">
+                <div class="card-body">
+                <h3>第七天</h3>
+                <div class="author">作者: 余华</div>
+                <div class="tags">
+                    <span class="tag">荒诞</span>
+                    <span class="tag">死后世界</span>
+                </div>
+                <a href="https://baike.baidu.com/item/%E7%AC%AC%E4%B8%83%E5%A4%A9" class="details-btn" target="_blank">查看详情</a>
+                </div>
+            </div>
+
+            </div>
+        </div>
+        </section>
+
+
+    <!-- 页脚 -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div>
+                    <h3>我的主页</h3>
+                    <p>记录我的学习、旅行和阅读</p>
+                    <p>经历的个人网站。</p>
+                </div>
+                <div class="footer-links">
+                    <h3>快速链接</h3>
+                    <ul>
+                        <li><a href="#home">首页</a></li>
+                        <li><a href="#about">个人介绍</a></li>
+                        <li><a href="#travel">旅行足迹</a></li>
+                        <li><a href="#courses">专业课程</a></li>
+                        <li><a href="#honor">竞赛经历</a></li>
+                        <li><a href="#books">阅读书籍</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>联系我</h3>
+                    <ul>
+                        <li><i class="fas fa-envelope"></i>1375281818@qq.com</li>
+                        <li><i class="fas fa-phone"></i>1375281818</li>
+                        <li><i class="fas fa-map-marker-alt"></i> 武汉市洪山区</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 我的个人主页. 保留所有权利.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+
+<!-- 背景图片切换 -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const images = document.querySelectorAll('.carousel-image');
+        let currentIndex = 0;
+        function changeImage() {
+            // 隐藏当前图片
+            images[currentIndex].classList.remove('active');
+            // 更新索引
+            currentIndex = (currentIndex + 1) % images.length;
+            // 显示新图片
+            images[currentIndex].classList.add('active');
+        }
+        // 每2秒切换一次图片(setInterval 函数每2秒调用一次 changeImage 函数，实现自动切换效果)
+        setInterval(changeImage, 2000);
+    });
+</script>
+
+<!-- 专业课程 -->
+<script>
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const buttons = document.querySelectorAll('.course-categories button');
+
+        buttons.forEach(button => {
+            button.addEventListener('click', function() {
+                // 移除所有按钮的 active 类
+                buttons.forEach(btn => btn.classList.remove('active'));
+                // 为当前点击的按钮添加 active 类
+                this.classList.add('active');
+            });
+        });
+    });
+
+    const courses = [
+    // 每个课程包含名称、简介、学分和修读学期
+    { title: "地理信息科学概论", description: "了解地理信息科学的基本概念与应用", credit: 2.0, grade: 86, semester: 1 },
+    { title: "数据结构与GIS算法", description: "学习数据结构与算法在GIS中的应用", credit: 2.0, grade: 93, semester: 3 },
+    { title: "数字测图与卫星导航", description: "掌握数字测图技术与卫星导航系统", credit: 2.0, grade: 98, semester: 3 },
+    { title: "面向对象程序设计", description: "学习面向对象编程在GIS软件开发中的应用", credit: 2.0, grade: 88, semester: 3 },
+    { title: "地图设计与编制", description: "学习地图设计与编制的原则和方法", credit: 4.0, grade: 82, semester: 3 },
+    { title: "地理信息系统原理", description: "系统学习地理信息系统的核心原理", credit: 2.0, grade: 92, semester: 4 },
+    { title: "机器学习", description: "了解并运用机器学习方法", credit: 2.0, grade: 93, semester: 4 },
+    { title: "地图设计与编制实习", description: "通过上机实习掌握地图设计与编制技能", credit: 3.0, grade: 89, semester: 4 },
+    { title: "遥感概论", description: "学习遥感技术的基本原理与应用", credit: 2.0, grade: 95, semester: 4 },
+    { title: "地图综合与尺度变换", description: "研究地图综合与尺度变换的理论和技术", credit: 2.0, grade: 90, semester: 5 },
+    { title: "地图综合", description: "掌握地图综合的基本原理与实践", credit: 2.0, grade: 89, semester: 5 },
+    { title: "空间分析", description: "深入学习GIS分析的方法和软件操作", credit: 2.0, grade: 95, semester: 5 },
+    { title: "空间数据库原理", description: "学习空间数据库的设计与管理原理", credit: 2.5, grade: 92, semester: 5 },
+    { title: "遥感实习", description: "通过实践学习掌握遥感数据处理技能", credit: 1.0, grade: 94, semester: 5 },
+    { title: "遥感数字图像处理", description: "学习遥感数字图像处理的技术与方法", credit: 2.0, grade: 97, semester: 5 },
+    { title: "GIS工程设计", description: "掌握GIS工程设计的流程与方法", credit: 2.0, grade: 94, semester: 6 },
+
+    // ... 其他课程数据
+    ];
+
+    const itemsPerPage = 8;
+    let currentPage = 1;
+
+    function updateCourses() {
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        const currentCourses = courses.slice(start, end);
+
+        // 获取course-grid容器
+        const courseGrid = document.querySelector('.course-grid');
+
+        // 先渐隐整个容器
+        courseGrid.style.transition = 'opacity 0.5s ease';
+        courseGrid.style.opacity = 0;
+
+        // 延迟执行内容更新和渐显
+        setTimeout(() => {
+            // 遍历所有8个容器
+            for (let i = 1; i <= 8; i++) {
+                const card = document.getElementById(`course-${i}`);
+                if (card) {
+                    if (i <= currentCourses.length) {
+                        // 显示有内容的容器
+                        card.style.display = 'block';
+                        const course = currentCourses[i - 1];
+                        card.querySelector('.course-title').textContent = course.title;
+                        card.querySelector('.course-description').textContent = course.description;
+                        card.querySelector('.course-credit').textContent = `学分: ${course.credit}`;
+                        card.querySelector('.course-grade').textContent = `修读学期: ${course.semester}`;
+                    } else {
+                        // 隐藏没有内容的容器
+                        card.style.display = 'none';
+                    }
+                }
+            }
+
+            // 渐显整个容器
+            courseGrid.style.opacity = 1;
+
+            // 更新页码显示
+            document.querySelector('.page-indicator').textContent = `第${currentPage}页`;
+        }, 500); // 等待渐隐动画完成
+    }
+
+    document.getElementById('prev-page').addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            updateCourses();
+        }
+    });
+
+    document.getElementById('next-page').addEventListener('click', () => {
+        if (currentPage * itemsPerPage < courses.length) {
+            currentPage++;
+            updateCourses();
+        }
+    });
+
+    // 初始化显示第一页
+    updateCourses();
+
+    // 获取元素
+    const showCoursesBtn = document.getElementById('show-courses');
+    const showChartBtn = document.getElementById('show-chart');
+    const courseContent = document.getElementById('course-content');
+    const courseChart = document.getElementById('course-chart');
+
+    // 显示课程内容
+    showCoursesBtn.addEventListener('click', () => {
+        courseContent.style.display = 'block';
+        courseChart.style.display = 'none';
+    });
+
+    // 显示成绩图表
+    showChartBtn.addEventListener('click', () => {
+    courseContent.style.display = 'none';
+    courseChart.style.display = 'block';
+
+    // 初始化ECharts实例
+    const myChart = echarts.init(courseChart);
+
+    // 准备数据
+    const courseNames = courses.map(course => course.title);
+    const courseGrades = courses.map(course => course.grade);
+
+    // 配置项
+    const option = {
+        title: {
+            text: '专业课成绩折线图',
+            left: 'center'
+        },
+        tooltip: {
+            trigger: 'axis'
+        },
+        xAxis: {
+            type: 'category',
+            data: courseNames,
+            axisLabel: {
+                rotate: 45
+            }
+        },
+        yAxis: {
+            type: 'value',
+            min: 70,
+            max: 100
+        },
+        grid: {
+            bottom: '5%', // 下边距
+            containLabel: true // 是否包含坐标轴标签在内边距中
+        },
+        series: [{
+            data: courseGrades,
+            type: 'line',
+            smooth: false, // 设置为直线
+            lineStyle: {
+                color: '#12513D',
+                width: 3
+            },
+            itemStyle: {
+                color: '#12513D'
+            }
+        }]
+    };
+
+    // 使用配置项显示图表
+    myChart.setOption(option);
+});
+
+</script>
+
+<!-- 竞赛经历 -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const buttons = document.querySelectorAll('.honor-categories button');
+        const comContent = document.getElementById('competitions-content');
+        const honorContent = document.getElementById('honors-content');
+
+        buttons.forEach(button => {
+            button.addEventListener('click', function() {
+                // 移除所有按钮的 active 类
+                buttons.forEach(btn => btn.classList.remove('active'));
+                // 为当前点击的按钮添加 active 类
+                this.classList.add('active');
+
+                // 显示或隐藏对应的内容
+                if (this.id === 'competitions') {
+                    comContent.style.display = 'block';
+                    honorContent.style.display = 'none';
+                } else if (this.id === 'honors') {
+                    comContent.style.display = 'none';
+                    honorContent.style.display = 'block';
+                }
+            });
+        });
+
+        // 初始化显示竞赛经历
+        comContent.style.display = 'block';
+        honorContent.style.display = 'none';
+    });
+</script>
+
+</html>

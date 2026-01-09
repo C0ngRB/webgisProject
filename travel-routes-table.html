@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      body {
+        margin: 0;
+        padding: 10px;
+        font-family: Arial, sans-serif;
+        font-size: 10px; /* 缩小字号 */
+        background-color: rgba(255, 255, 255, 0.8); /* 白色80%透明 */
+      }
+      .point-form {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        height: 100%;
+        background-color: transparent; /* 确保表单背景透明 */
+      }
+      .point-item {
+        display: flex;
+        align-items: center;
+        padding: 8px;
+        border-bottom: 1px solid #eee;
+      }
+      .point-item input[type="checkbox"] {
+        margin-right: 10px;
+      }
+      .button-group {
+        display: flex;
+        justify-content: center; /* 改为居中 */
+        gap: 40px; /* 添加按钮间距 */
+        margin-top: auto;
+        padding-top: 10px;
+      }
+      .delete-btn,
+      .cancel-btn {
+        padding: 8px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 120px; /* 统一宽度 */
+      }
+      .delete-btn {
+        background-color: #12513d;
+        color: white;
+      }
+      .cancel-btn {
+        background-color: #ccc;
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="point-form">
+      <div id="routesContainer"></div>
+      <div class="button-group">
+        <button class="delete-btn" onclick="deleteSelected()">删除选中</button>
+        <button class="cancel-btn" id="cancelBtn">取消</button>
+      </div>
+    </div>
+
+    <script>
+      let routesData = [];
+
+      window.addEventListener("message", function (event) {
+        if (event.data.type === "setTravelRoutes") {
+          routesData = Array.isArray(event.data.routes)
+            ? event.data.routes
+            : [];
+          renderRoutes();
+        }
+      });
+
+      function renderRoutes() {
+        const container = document.getElementById("routesContainer");
+        container.innerHTML = "";
+
+        routesData.forEach((route, index) => {
+          const item = document.createElement("div");
+          item.className = "point-item";
+          // 将gid存储在data属性中但不显示
+          item.setAttribute("data-gid", route.gid);
+          item.innerHTML = `
+                    <input type="checkbox" id="route-${index}">
+                    <label for="route-${index}">
+                        起点：${route.start || "未知"}，终点：${
+            route.end || "未知"
+          }
+                    </label>
+                `;
+          container.appendChild(item);
+        });
+      }
+
+      document
+        .getElementById("cancelBtn")
+        .addEventListener("click", function () {
+          window.parent.postMessage({ type: "closeForm" }, "*");
+        });
+
+      function deleteSelected() {
+        const selectedRoutes = Array.from(
+          document.querySelectorAll('input[type="checkbox"]:checked')
+        )
+          .map((checkbox) => {
+            const item = checkbox.closest(".point-item");
+            return item
+              ? {
+                  gid: item.dataset.gid,
+                  start: routesData.find((r) => r.gid == item.dataset.gid)
+                    ?.start,
+                  end: routesData.find((r) => r.gid == item.dataset.gid)?.end,
+                }
+              : null;
+          })
+          .filter((route) => route !== null);
+
+        if (selectedRoutes.length === 0) {
+          alert("请至少选择一条要删除的路线");
+          return;
+        }
+
+        Promise.all(
+          selectedRoutes.map((route) =>
+            fetch("https://webgisproject.onrender.com/deletetravelroute", {
+              method: "DELETE",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ gid: route.gid }),
+            }).then((response) => {
+              if (!response.ok) {
+                throw new Error(`删除失败: HTTP ${response.status}`);
+              }
+              return response.json();
+            })
+          )
+        )
+          .then(() => {
+            alert("删除成功");
+            // 刷新父页面并关闭表单
+            window.parent.postMessage(
+              {
+                type: "reloadParentPage",
+              },
+              "*"
+            );
+            window.parent.postMessage(
+              {
+                type: "closeForm",
+              },
+              "*"
+            );
+          })
+          .catch((error) => {
+            console.error("删除过程中出错:", error);
+            alert("部分删除操作可能未完成");
+          });
+      }
+
+      // 添加点击其他区域关闭表单的功能
+      document.addEventListener("click", function (e) {
+        if (
+          !e.target.closest(".point-form") &&
+          !e.target.closest(".control-btn")
+        ) {
+          window.parent.postMessage({ type: "closeForm" }, "*");
+        }
+      });
+    </script>
+  </body>
+</html>

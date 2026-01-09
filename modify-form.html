@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+      #modify-form {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 15px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+      }
+      .form-group {
+        margin-bottom: 10px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      .form-group textarea {
+        flex: 1;
+      }
+      .form-group label {
+        display: block;
+        margin-bottom: 5px;
+      }
+      .form-group input,
+      .form-group textarea {
+        width: 100%;
+        padding: 5px;
+        box-sizing: border-box;
+      }
+      .form-group textarea {
+        height: 80px;
+      }
+      .form-buttons {
+        display: flex;
+        gap: 5px;
+        margin-top: 10px;
+      }
+      .form-buttons button {
+        flex: 1;
+        padding: 5px;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+      }
+      .submit-btn {
+        background: #12513d;
+        color: white;
+      }
+      .cancel-btn {
+        background: #ccc;
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="modify-form">
+      <div class="form-group">
+        <label>坐标：</label>
+        <input type="text" id="coordInput" readonly />
+      </div>
+      <div class="form-group">
+        <div style="display: flex; gap: 10px">
+          <div style="flex: 1">
+            <label>省份：</label>
+            <input type="text" id="provinceInput" />
+          </div>
+          <div style="flex: 1">
+            <label>城市：</label>
+            <input type="text" id="cityInput" />
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>备注：</label>
+        <textarea id="noteInput"></textarea>
+      </div>
+      <div class="form-buttons">
+        <button class="submit-btn" id="submitBtn">确定</button>
+        <button class="cancel-btn" id="cancelBtn">取消</button>
+      </div>
+    </div>
+    <script>
+      let pointData = null;
+
+      // 从父窗口获取数据
+      window.addEventListener("message", function (event) {
+        if (event.data.type === "setModifyData") {
+          pointData = event.data.point;
+          document.getElementById(
+            "coordInput"
+          ).value = `纬度 ${pointData.lat.toFixed(
+            4
+          )}, 经度 ${pointData.lon.toFixed(4)}`;
+          document.getElementById("provinceInput").value =
+            pointData.province || "";
+          document.getElementById("cityInput").value = pointData.name || "";
+          document.getElementById("noteInput").value = pointData.info || "";
+        }
+      });
+
+      // 确定按钮点击事件
+      document
+        .getElementById("submitBtn")
+        .addEventListener("click", async function () {
+          const updatedData = {
+            gid: pointData.gid,
+            province: document.getElementById("provinceInput").value,
+            name: document.getElementById("cityInput").value,
+            info: document.getElementById("noteInput").value,
+            lat: pointData.lat,
+            lon: pointData.lon,
+          };
+
+          try {
+            const response = await fetch(
+              "https://webgisproject.onrender.com/updatetravelpoint",
+              {
+                method: "PUT",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(updatedData),
+              }
+            );
+
+            if (!response.ok) {
+              const errorText = await response.text();
+              throw new Error(
+                `服务器返回错误: ${response.status} - ${errorText}`
+              );
+            }
+
+            const result = await response.json();
+            alert("修改成功！");
+
+            // 通知父窗口刷新页面
+            window.parent.postMessage(
+              {
+                type: "reloadParentPage",
+              },
+              "*"
+            );
+
+            window.parent.postMessage({ type: "closeForm" }, "*");
+          } catch (err) {
+            console.error("API请求失败:", err);
+            alert(`修改失败: ${err.message}`);
+          }
+        });
+
+      // 取消按钮点击事件
+      document
+        .getElementById("cancelBtn")
+        .addEventListener("click", function () {
+          // 通知父窗口关闭表单并清除所有修改标记
+          window.parent.postMessage(
+            {
+              type: "closeForm",
+              clearMarkers: true, // 新增标志位表示需要清除标记
+            },
+            "*"
+          );
+        });
+    </script>
+  </body>
+</html>
