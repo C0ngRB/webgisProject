@@ -1,13 +1,15 @@
 {
-  "name": "webgisproject",
+  "name": "webgis-backend",
   "version": "1.0.0",
+  "description": "",
   "main": "backend.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node backend.js"
+    "start": "node backend.js"  
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": ""
+  "dependencies": {
+    "pg": "^8.11.3"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
 }
