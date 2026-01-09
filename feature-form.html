@@ -170,6 +170,7 @@
       </div>
     </div>
     <script>
+      let currentUser = '访客'; // 默认值
       // 修改类型切换事件监听
       document
         .querySelectorAll('input[name="featureType"]')
@@ -277,7 +278,9 @@
             "*"
           );
         }
-
+        if(event.data.type === 'setOwner') {
+          currentUser = event.data.owner;
+        }
         // 处理点选择事件
         if (event.data.type === "pointSelected") {
           const point = event.data.point;
@@ -338,6 +341,7 @@
             const note = document.getElementById("noteInput").value;
 
             const data = {
+              owner: currentUser
               lat: receivedLat,
               lon: receivedLng,
               province: province,
@@ -462,3 +466,4 @@
     </script>
   </body>
 </html>
+
