@@ -23,7 +23,7 @@
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
         #map { width: 100%; height: 100%; }
         
-        /* 控制面板样式 */
+        /* 右上角控制面板样式 */
         .control-panel {
             position: absolute; right: 60px; top: 15px; z-index: 1000;
             background: transparent; display: flex; gap: 10px;
@@ -37,7 +37,7 @@
         }
         .control-btn:hover { background: #12513D; color: white; }
         
-        /* 搜索框样式 */
+        /* 顶部搜索框样式 */
         .search-box {
             position: absolute; left: 50%; top: 15px; transform: translateX(-50%); z-index: 1000;
         }
@@ -49,9 +49,36 @@
         .search-icon {
             position: absolute; right: 8px; top: 8px; color: #12513D; cursor: pointer;
         }
+
+        /* === 左上角视角切换器样式 === */
+        .view-switcher {
+            position: absolute; left: 60px; top: 15px; z-index: 1000;
+            background: white; padding: 8px 12px; border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            font-size: 14px; color: #12513D; font-weight: bold;
+            display: flex; gap: 15px; align-items: center;
+        }
+        .view-switcher label { cursor: pointer; display: flex; align-items: center; gap: 5px; }
+        
+        /* === 图例样式 (团队模式显示) === */
+        .legend {
+            background: white; padding: 10px; border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            position: absolute; bottom: 30px; right: 10px; z-index: 1000;
+            display: none; /* 默认隐藏 */
+            max-height: 250px; overflow-y: auto; width: 120px;
+        }
+        .legend h4 { margin: 0 0 8px 0; font-size: 14px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; font-size: 12px; }
+        .color-box { width: 12px; height: 12px; border-radius: 50%; border: 1px solid #ccc; flex-shrink: 0; }
     </style>
 </head>
 <body>
+    <div class="view-switcher">
+        <label><input type="radio" name="viewMode" value="personal" checked> 个人视角</label>
+        <label><input type="radio" name="viewMode" value="team"> 团队视角</label>
+    </div>
+
     <div class="search-box">
         <div class="search-container">
             <input type="text" placeholder="搜索地点..." class="search-input">
@@ -66,17 +93,36 @@
         <button class="control-btn" onclick="queryFeature()" title="列表统计"><i class="fas fa-list"></i></button>
     </div>
 
+    <div id="legend" class="legend"></div>
+
     <div id="map"></div>
 
     <script>
         // ================= 配置区域 =================
-        // 1. 你的 Render 后端地址 (注意是 https)
+        // 你的 Render 后端地址
         const RENDER_HOST = "https://webgisproject.onrender.com"; 
-        // 2. 你的天地图 Key
+        // 你的天地图 Key
         const TDT_TK = "09b4ac8f49f3aeba74d8731519d21e3f";
         // ===========================================
 
-        // 初始化底图 (天地图)
+        // 1. 获取当前用户身份 (从 URL 参数中获取 ?owner=xxx)
+        const urlParams = new URLSearchParams(window.location.search);
+        const CURRENT_USER = urlParams.get('owner') || '访客';
+        console.log("当前登录用户:", CURRENT_USER);
+
+        // 2. 颜色生成算法：根据名字生成固定颜色
+        function getColorByName(name) {
+            if (!name) return '#999999';
+            let hash = 0;
+            for (let i = 0; i < name.length; i++) {
+                hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const c = (hash & 0x00FFFFFF).toString(16).toUpperCase();
+            return '#' + "00000".substring(0, 6 - c.length) + c;
+        }
+
+        // ================= 地图初始化 =================
+        // 天地图图层
         const tdtVec = L.tileLayer(`http://t{s}.tianditu.gov.cn/vec_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=vec&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=${TDT_TK}`, {
             subdomains: ['0', '1', '2', '3', '4', '5', '6', '7'], attribution: '天地图'
         });
@@ -90,198 +136,142 @@
         const vecGroup = L.layerGroup([tdtVec, tdtCva]);
         const imgGroup = L.layerGroup([tdtImg, tdtCva]);
 
-        // 初始化地图
+        // 创建地图
         const map = L.map('map', {
             center: [30.59, 114.30], // 默认武汉
             zoom: 5,
             layers: [vecGroup],
-            zoomControl: false // 隐藏默认缩放控件，后面可以自己加或者用默认位置
+            zoomControl: false
         });
         L.control.zoom({position: 'topleft'}).addTo(map);
 
-        // 1. 图层切换控件 (解决要求：底图切换)
-        const baseLayers = { "天地图矢量": vecGroup, "天地图影像": imgGroup };
-        L.control.layers(baseLayers).addTo(map);
-
-        // 2. 鼠标坐标控件
+        // 控件组
+        L.control.layers({ "天地图矢量": vecGroup, "天地图影像": imgGroup }).addTo(map);
         L.control.mousePosition({ position: 'bottomleft', prefix: "坐标：" }).addTo(map);
-
-        // 3. 比例尺
         L.control.scale().addTo(map);
-
-        // 4. 量算工具 (解决要求：量算功能)
+        
+        // 量算工具
         const measureControl = new L.Control.Measure({
             primaryLengthUnit: 'kilometers', secondaryLengthUnit: 'meters',
             primaryAreaUnit: 'sqmeters', activeColor: '#12513D', completedColor: '#12513D'
         });
         measureControl.addTo(map);
 
-        // 5. 拉框查询工具 (解决要求：空间查询)
+        // 拉框查询工具
         const drawControl = new L.Control.Draw({
             draw: { polygon: false, marker: false, circle: false, polyline: false, circlemarker: false, rectangle: true },
             edit: false
         });
         map.addControl(drawControl);
 
-        // 结果显示图层
-        let queryLayer = L.layerGroup().addTo(map);
-        let markersLayer = L.layerGroup().addTo(map); // 存放普通加载的点
+        // ================= 核心逻辑：数据加载与展示 =================
+        let markersLayer = L.layerGroup().addTo(map);
+        let queryLayer = L.layerGroup().addTo(map); // 拉框结果层
+        let currentMode = 'personal'; // 默认个人视角
 
-        // 监听拉框完成事件
-        map.on(L.Draw.Event.CREATED, function (e) {
-            const layer = e.layer;
-            const bounds = layer.getBounds();
-            queryLayer.clearLayers();
-            queryLayer.addLayer(layer); // 显示框
+        function loadPoints() {
+            markersLayer.clearLayers();
+            const legendDiv = document.getElementById('legend');
+            legendDiv.innerHTML = '<h4>成员图例</h4>';
+            let ownersSet = new Set(); 
 
-            const minLat = bounds.getSouth();
-            const maxLat = bounds.getNorth();
-            const minLon = bounds.getWest();
-            const maxLon = bounds.getEast();
+            // 构建请求 API
+            let api = `${RENDER_HOST}/searchtravelpoints`;
+            if (currentMode === 'personal') {
+                api += `?owner=${encodeURIComponent(CURRENT_USER)}`;
+            }
 
-            // 调用后端拉框接口
-            fetch(`${RENDER_HOST}/query-bbox?minLon=${minLon}&minLat=${minLat}&maxLon=${maxLon}&maxLat=${maxLat}`)
+            fetch(api)
                 .then(res => res.json())
                 .then(data => {
-                    alert(`查询到 ${data.length} 个足迹点！`);
                     data.forEach(point => {
-                        L.circleMarker([point.lat, point.lon], { color: 'red', radius: 8 })
-                         .addTo(queryLayer)
-                         .bindPopup(`<b>${point.name}</b><br>${point.info}<br><small>记录人: ${point.owner || '未知'}</small>`)
-                         .openPopup();
+                        // 1. 确定颜色
+                        let color = '#12513D'; // 个人视角默认绿色
+                        if (currentMode === 'team') {
+                            color = getColorByName(point.owner);
+                            ownersSet.add(point.owner || '未知');
+                        }
+
+                        // 2. 创建点
+                        const marker = L.circleMarker([point.lat, point.lon], {
+                            color: 'white',       // 边框白
+                            fillColor: color,     // 填充色
+                            fillOpacity: 0.9,
+                            weight: 2,
+                            radius: 8
+                        }).addTo(markersLayer);
+
+                        // 3. 绑定弹窗内容
+                        const timeStr = point.time ? point.time.replace('T', ' ').substring(0, 16) : '历史数据';
+                        const popupContent = `
+                            <div style="min-width:160px; font-family:Arial;">
+                                <h3 style="margin:0 0 8px 0; color:${color}; border-bottom:1px solid #eee; padding-bottom:5px;">
+                                    ${point.name}
+                                </h3>
+                                <div style="margin-bottom:8px; font-size:13px;">${point.info || '暂无备注'}</div>
+                                <div style="background:#f5f5f5; padding:5px; border-radius:4px; font-size:12px; color:#666;">
+                                    <div>👤 <span style="font-weight:bold">${point.owner || '未知'}</span></div>
+                                    <div style="margin-top:2px;">🕒 ${timeStr}</div>
+                                </div>
+                            </div>
+                        `;
+                        marker.bindPopup(popupContent);
                     });
+
+                    // 4. 生成图例 (仅团队模式)
+                    if (currentMode === 'team' && ownersSet.size > 0) {
+                        legendDiv.style.display = 'block';
+                        ownersSet.forEach(owner => {
+                            const c = getColorByName(owner);
+                            legendDiv.innerHTML += `
+                                <div class="legend-item">
+                                    <div class="color-box" style="background:${c}"></div>
+                                    <span>${owner}</span>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        legendDiv.style.display = 'none';
+                    }
                 })
-                .catch(err => {
-                    console.error(err);
-                    alert("查询失败，请检查后端是否启动");
-                });
+                .catch(err => console.error("加载数据失败:", err));
+        }
+
+        // 监听视角切换
+        document.querySelectorAll('input[name="viewMode"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                currentMode = e.target.value;
+                loadPoints();
+            });
         });
 
-        // ================= 原有业务逻辑 (增删改查) =================
+        // 初始加载
+        loadPoints();
+
+        // ================= 增删改查交互逻辑 =================
+        let activeIframe = null;
         let clickHandler = null;
         let modifyMarkers = [];
         let searchMarkers = [];
 
-        // 加载所有点
-        function loadAllPoints() {
-            fetch(`${RENDER_HOST}/searchtravelpoints`)
-                .then(res => res.json())
-                .then(data => {
-                    markersLayer.clearLayers();
-                    data.forEach(point => {
-                        L.marker([point.lat, point.lon]).addTo(markersLayer)
-                         .bindPopup(`<b>${point.name}</b><br>${point.info}`);
-                    });
-                });
-        }
-        // 页面加载时自动加载点
-        loadAllPoints();
-
-        // 添加功能
-        function addFeature() {
-            clearForms();
-            const formContainer = createIframe('feature-form.html', 300);
-            document.getElementById('map').appendChild(formContainer);
-            
-            document.getElementById('map').style.cursor = 'crosshair';
-            
-            const mouseMoveHandler = function(e) {
-                if (formContainer.contentWindow) {
-                    formContainer.contentWindow.postMessage({
-                        type: 'setCoordinates', lat: e.latlng.lat, lng: e.latlng.lng
-                    }, '*');
-                }
-            };
-            
-            clickHandler = function(e) {
-                document.getElementById('map').style.cursor = '';
-                map.off('click', clickHandler);
-                map.off('mousemove', mouseMoveHandler);
-            };
-            
-            map.on('mousemove', mouseMoveHandler);
-            map.on('click', clickHandler);
-        }
-
-        // 删除功能
-        function deleteFeature() {
-            clearForms();
-            // 先弹出一个简单的选择框 (这里简化逻辑，直接调用后端获取列表)
-            fetch(`${RENDER_HOST}/searchtravelpoints`)
-                .then(res => res.json())
-                .then(data => {
-                    const formContainer = createIframe('travel-points-table.html', 400, 350);
-                    document.getElementById('map').appendChild(formContainer);
-                    formContainer.onload = function() {
-                        formContainer.contentWindow.postMessage({ type: 'setTravelPoints', points: data }, '*');
-                    };
-                });
-        }
-
-        // 列表统计
-        function queryFeature() {
-            clearForms();
-            fetch(`${RENDER_HOST}/searchtravelpoints`)
-                .then(res => res.json())
-                .then(data => {
-                    const formContainer = createIframe('stats-table.html', 400, 500);
-                    document.getElementById('map').appendChild(formContainer);
-                    formContainer.onload = function() {
-                        formContainer.contentWindow.postMessage({ type: 'setStatsData', points: data }, '*');
-                    };
-                });
-        }
-
-        // 修改功能
-        function modifyFeature() {
-            clearForms();
-            fetch(`${RENDER_HOST}/searchtravelpoints`)
-                .then(res => res.json())
-                .then(data => {
-                    data.forEach(point => {
-                        const marker = L.circleMarker([point.lat, point.lon], { color: 'orange', radius: 8 }).addTo(map);
-                        modifyMarkers.push(marker);
-                        marker.on('click', function() {
-                            // 清除其他标记只留这个
-                            modifyMarkers.forEach(m => { if(m!==marker) map.removeLayer(m); });
-                            modifyMarkers = [marker];
-                            
-                            const formContainer = createIframe('modify-form.html', 300);
-                            document.getElementById('map').appendChild(formContainer);
-                            formContainer.onload = function() {
-                                formContainer.contentWindow.postMessage({ type: 'setModifyData', point: point }, '*');
-                            };
-                        });
-                    });
-                    alert("请点击地图上的橙色点进行修改");
-                });
-        }
-
-        // 辅助函数：创建iframe
+        // 辅助函数：创建 iframe
         function createIframe(src, height, width=250) {
             const iframe = document.createElement('iframe');
             iframe.src = src;
-            iframe.className = 'popup-form';
-            iframe.style.position = 'absolute';
-            iframe.style.right = '10px';
-            iframe.style.top = '60px';
-            iframe.style.width = width + 'px';
-            iframe.style.height = height + 'px';
-            iframe.style.border = 'none';
-            iframe.style.borderRadius = '8px';
-            iframe.style.zIndex = '2000';
-            iframe.style.background = 'white';
+            iframe.style.position = 'absolute'; iframe.style.right = '10px'; iframe.style.top = '60px';
+            iframe.style.width = width + 'px'; iframe.style.height = height + 'px';
+            iframe.style.border = 'none'; iframe.style.borderRadius = '8px';
+            iframe.style.zIndex = '2000'; iframe.style.background = 'white';
             iframe.style.boxShadow = '0 0 10px rgba(0,0,0,0.2)';
-            iframe.id = 'active-form';
             return iframe;
         }
 
-        // 清除所有表单和临时标记
-        function clearForms() {
-            const form = document.getElementById('active-form');
-            if (form) form.remove();
+        function closeActiveForm() {
+            if(activeIframe) { activeIframe.remove(); activeIframe = null; }
             modifyMarkers.forEach(m => map.removeLayer(m));
             modifyMarkers = [];
+            searchMarkers.forEach(m => map.removeLayer(m));
+            searchMarkers = [];
             if (clickHandler) {
                 map.off('click', clickHandler);
                 clickHandler = null;
@@ -289,24 +279,144 @@
             document.getElementById('map').style.cursor = '';
         }
 
-        // 监听 iframe 发来的消息
-        window.addEventListener('message', function(event) {
-            if (event.data.type === 'closeForm') {
-                clearForms();
-            }
-            if (event.data.type === 'reloadParentPage') {
-                loadAllPoints(); // 刷新数据而不是刷新页面
-                clearForms();
-            }
-            // 之前的 addMarker 逻辑
-            if(event.data.type === 'addMarker') {
-                L.circleMarker([event.data.marker.lat, event.data.marker.lng], {
-                    color: '#12513D', radius: 5
-                }).addTo(map);
-            }
+        // 1. 添加功能
+        function addFeature() {
+            closeActiveForm();
+            // 注意：这里不需要在URL传owner，而是通过 postMessage 传
+            const iframe = createIframe('feature-form.html', 300);
+            document.body.appendChild(iframe);
+            activeIframe = iframe;
+
+            // Iframe 加载完成后，告诉它当前用户是谁
+            iframe.onload = function() {
+                iframe.contentWindow.postMessage({
+                    type: 'setOwner',
+                    owner: CURRENT_USER
+                }, '*');
+            };
+            
+            document.getElementById('map').style.cursor = 'crosshair';
+            
+            const mouseMoveHandler = function(e) {
+                if (iframe.contentWindow) {
+                    iframe.contentWindow.postMessage({
+                        type: 'setCoordinates', lat: e.latlng.lat, lng: e.latlng.lng
+                    }, '*');
+                }
+            };
+            
+            clickHandler = function(e) {
+                document.getElementById('map').style.cursor = '';
+                map.off('mousemove', mouseMoveHandler);
+                map.off('click', clickHandler);
+                clickHandler = null;
+            };
+            
+            map.on('mousemove', mouseMoveHandler);
+            map.on('click', clickHandler);
+        }
+
+        // 2. 删除功能
+        function deleteFeature() {
+            closeActiveForm();
+            // 获取列表 (建议这里也根据 currentMode 决定是否只能删自己的，暂时先查全部)
+            fetch(`${RENDER_HOST}/searchtravelpoints`)
+                .then(res => res.json())
+                .then(data => {
+                    // 如果是个人模式，只筛选出自己的点供删除
+                    let pointsToShow = data;
+                    if(currentMode === 'personal') {
+                        pointsToShow = data.filter(p => p.owner === CURRENT_USER);
+                    }
+                    
+                    const iframe = createIframe('travel-points-table.html', 400, 350);
+                    document.body.appendChild(iframe);
+                    activeIframe = iframe;
+                    iframe.onload = function() {
+                        iframe.contentWindow.postMessage({ type: 'setTravelPoints', points: pointsToShow }, '*');
+                    };
+                });
+        }
+
+        // 3. 修改功能
+        function modifyFeature() {
+            closeActiveForm();
+            fetch(`${RENDER_HOST}/searchtravelpoints`)
+                .then(res => res.json())
+                .then(data => {
+                    let count = 0;
+                    data.forEach(point => {
+                        // 只能修改自己的点
+                        if (point.owner !== CURRENT_USER && point.owner !== undefined) return;
+
+                        count++;
+                        const marker = L.circleMarker([point.lat, point.lon], { 
+                            color: '#FF9900', radius: 10, fillOpacity: 0.5 
+                        }).addTo(map);
+                        modifyMarkers.push(marker);
+                        
+                        marker.on('click', function() {
+                            modifyMarkers.forEach(m => { if(m!==marker) map.removeLayer(m); });
+                            modifyMarkers = [marker];
+                            
+                            if(activeIframe) activeIframe.remove();
+                            const iframe = createIframe('modify-form.html', 300);
+                            document.body.appendChild(iframe);
+                            activeIframe = iframe;
+                            iframe.onload = function() {
+                                iframe.contentWindow.postMessage({ type: 'setModifyData', point: point }, '*');
+                            };
+                        });
+                    });
+                    
+                    if(count === 0) alert("没有找到属于你的足迹点（无法修改他人的点）。");
+                    else alert("请点击地图上的橙色光圈进行修改");
+                });
+        }
+
+        // 4. 列表统计
+        function queryFeature() {
+            closeActiveForm();
+            let api = `${RENDER_HOST}/searchtravelpoints`;
+            if (currentMode === 'personal') api += `?owner=${encodeURIComponent(CURRENT_USER)}`;
+
+            fetch(api).then(res => res.json()).then(data => {
+                const iframe = createIframe('stats-table.html', 400, 500);
+                document.body.appendChild(iframe);
+                activeIframe = iframe;
+                iframe.onload = function() {
+                    iframe.contentWindow.postMessage({ type: 'setStatsData', points: data }, '*');
+                };
+            });
+        }
+
+        // 5. 拉框查询
+        map.on(L.Draw.Event.CREATED, function (e) {
+            const layer = e.layer;
+            const bounds = layer.getBounds();
+            queryLayer.clearLayers();
+            queryLayer.addLayer(layer);
+
+            const minLat = bounds.getSouth();
+            const maxLat = bounds.getNorth();
+            const minLon = bounds.getWest();
+            const maxLon = bounds.getEast();
+
+            fetch(`${RENDER_HOST}/query-bbox?minLon=${minLon}&minLat=${minLat}&maxLon=${maxLon}&maxLat=${maxLat}`)
+                .then(res => res.json())
+                .then(data => {
+                    alert(`查询区域内共有 ${data.length} 个足迹点！`);
+                    data.forEach(point => {
+                        const color = getColorByName(point.owner);
+                        L.circleMarker([point.lat, point.lon], { color: 'red', fillColor: color, radius: 6 })
+                         .addTo(queryLayer)
+                         .bindPopup(`<b>${point.name}</b><br>记录人: ${point.owner || '未知'}`)
+                         .openPopup();
+                    });
+                });
         });
 
-        // 搜索功能
+        // 6. 搜索功能
         document.querySelector('.search-icon').addEventListener('click', function() {
             const val = document.querySelector('.search-input').value;
             if(!val) return;
@@ -317,12 +427,23 @@
                     searchMarkers = [];
                     if(data.length === 0) { alert('未找到'); return; }
                     data.forEach(p => {
-                        const m = L.marker([p.lat, p.lon]).addTo(map).bindPopup(p.name).openPopup();
+                        const m = L.marker([p.lat, p.lon]).addTo(map)
+                            .bindPopup(`<b>${p.name}</b><br>${p.info}`).openPopup();
                         searchMarkers.push(m);
                     });
                     map.setView([data[0].lat, data[0].lon], 10);
                 });
         });
+
+        // 消息监听
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'closeForm') closeActiveForm();
+            if (event.data.type === 'reloadParentPage') {
+                loadPoints(); 
+                closeActiveForm();
+            }
+        });
+
     </script>
 </body>
 </html>
