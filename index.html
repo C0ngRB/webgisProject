@@ -9,195 +9,249 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); /* 浅灰蓝渐变背景 */
-            height: 100vh;
-            overflow: hidden; /* 动画结束前禁止滚动 */
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        /* --- 1. 过场动画层样式 --- */
+        /* --- 开场动画层 --- */
         #intro-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #12513D; /* 使用你们的主题深绿色 */
-            z-index: 9999; /* 保证在最上层 */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            color: white;
-            /* 动画：保持3秒，然后执行 slideUp 动画 */
-            animation: slideUp 1s ease-in-out 2.5s forwards; 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #12513D; z-index: 9999;
+            display: flex; justify-content: center; align-items: center; flex-direction: column;
+            color: white; animation: slideUp 1s ease-in-out 2.5s forwards;
         }
+        .intro-text { font-size: 3rem; font-weight: bold; opacity: 0; letter-spacing: 5px; animation: fadeIn 1.5s ease-in-out 0.5s forwards; }
+        .intro-sub { font-size: 1.2rem; margin-top: 20px; opacity: 0; color: #C3DCC4; animation: fadeIn 1.5s ease-in-out 1s forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { 0% { transform: translateY(0); } 100% { transform: translateY(-100%); } }
 
-        .intro-text {
-            font-size: 3rem;
-            font-weight: bold;
-            opacity: 0;
-            letter-spacing: 5px;
-            /* 文字淡入动画 */
-            animation: fadeIn 1.5s ease-in-out 0.5s forwards;
-        }
-
-        .intro-sub {
-            font-size: 1.2rem;
-            margin-top: 20px;
-            opacity: 0;
-            color: #C3DCC4;
-            animation: fadeIn 1.5s ease-in-out 1s forwards;
-        }
-
-        /* 动画关键帧定义 */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes slideUp {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(-100%); } /* 向上移出屏幕 */
-        }
-
-        /* --- 2. 主页面内容样式 --- */
+        /* --- 主内容 --- */
         .main-container {
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            opacity: 0; /* 初始隐藏 */
-            animation: showContent 1s ease-in-out 3s forwards; /* 等过场动画结束后显示 */
+            padding-top: 50px;
+            display: flex; flex-direction: column; align-items: center;
+            opacity: 0; animation: showContent 1s ease-in-out 3s forwards;
         }
-
-        @keyframes showContent {
-            to { opacity: 1; }
-        }
+        @keyframes showContent { to { opacity: 1; } }
 
         .team-title {
-            font-size: 2.5rem;
-            color: #12513D;
-            margin-bottom: 3rem;
+            font-size: 2.5rem; color: #12513D; margin-bottom: 3rem;
             text-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
         .cards-wrapper {
-            display: flex;
-            gap: 30px; /* 卡片之间的间距 */
-            flex-wrap: wrap;
-            justify-content: center;
-            padding: 0 20px;
+            display: flex; gap: 30px; flex-wrap: wrap; justify-content: center;
+            padding: 0 20px 50px 20px; width: 100%; max-width: 1200px;
         }
 
-        /* 成员卡片样式 */
+        /* 成员卡片 */
         .member-card {
-            width: 220px;
-            height: 300px;
-            background: white;
-            border-radius: 15px;
-            text-decoration: none; /* 去掉下划线 */
-            color: #333;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            overflow: hidden;
-            position: relative;
+            width: 220px; height: 300px; background: white; border-radius: 15px;
+            text-decoration: none; color: #333; box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease; display: flex; flex-direction: column;
+            align-items: center; overflow: hidden; position: relative; cursor: pointer;
+        }
+        .member-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(18, 81, 61, 0.3); }
+
+        .card-img { width: 100%; height: 70%; object-fit: cover; border-bottom: 4px solid #12513D; }
+        .card-info { height: 30%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .name { font-size: 1.2rem; font-weight: bold; color: #12513D; margin-bottom: 5px; }
+        .role { font-size: 0.9rem; color: #666; text-align: center; padding: 0 5px; }
+
+        /* 管理按钮 */
+        .admin-btn {
+            position: fixed; bottom: 20px; right: 20px;
+            background: #12513D; color: white; padding: 10px 20px; border-radius: 30px;
+            cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 1000;
+            border: none; font-weight: bold; transition: all 0.3s;
+        }
+        .admin-btn:hover { background: #0e3f30; transform: scale(1.05); }
+
+        /* 删除按钮 (默认隐藏) */
+        .delete-btn {
+            position: absolute; top: 10px; right: 10px;
+            background: red; color: white; width: 25px; height: 25px; border-radius: 50%;
+            text-align: center; line-height: 25px; cursor: pointer; display: none;
+            font-weight: bold; z-index: 10;
         }
 
-        /* 鼠标悬停特效 */
-        .member-card:hover {
-            transform: translateY(-15px); /* 上浮 */
-            box-shadow: 0 20px 40px rgba(18, 81, 61, 0.3); /* 阴影加深 */
+        /* 添加成员弹窗 */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 2000;
         }
-
-        .card-img {
-            width: 100%;
-            height: 70%;
-            object-fit: cover; /* 保证图片填满且不变形 */
-            border-bottom: 4px solid #12513D;
+        .modal-content {
+            background: white; padding: 30px; border-radius: 10px; width: 320px;
+            display: flex; flex-direction: column; gap: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
-
-        .card-info {
-            height: 30%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .name {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #12513D;
-            margin-bottom: 5px;
-        }
-
-        .role {
-            font-size: 0.9rem;
-            color: #666;
-        }
-
+        .modal h3 { color: #12513D; text-align: center; margin-bottom: 10px; }
+        .modal input { padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; }
+        .modal button { padding: 10px; background: #12513D; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .modal button:hover { background: #0e3f30; }
+        .modal .cancel { background: #999; }
+        .modal .cancel:hover { background: #777; }
     </style>
 </head>
 <body>
 
     <div id="intro-overlay">
-        <div class="intro-text">IVE 小组</div>
+        <div class="intro-text">aespa 小组</div>
         <div class="intro-sub">WebGIS 课程项目展示</div>
     </div>
 
     <div class="main-container">
         <h1 class="team-title">欢迎访问 IVE 小组主页</h1>
         
-        <div class="cards-wrapper">
+        <div class="cards-wrapper" id="members-container">
+            <p style="font-size: 1.2rem; color: #666;">正在连接云端数据库...</p>
+        </div>
+    </div>
 
-            <a href="cqy.html" class="member-card">
-                <img src="image/陈秋宇.jpg" alt="成员1" class="card-img">
-                <div class="card-info">
-                    <span class="name">陈秋宇</span>
-                    <span class="role">组长 / 前端开发</span>
-                </div>
-            </a>
+    <button class="admin-btn" onclick="toggleAdminMode()">🔧 管理成员</button>
 
-            <a href="crb.html" class="member-card">
-                <img src="image/丛瑞伯.jpg" alt="成员2" class="card-img">
-                <div class="card-info">
-                    <span class="name">丛瑞伯</span>
-                    <span class="role">后端开发 / 数据处理</span>
-                </div>
-            </a>
-
-            <a href="axy.html" class="member-card">
-                <img src="image/安小丫.jpg" alt="成员3" class="card-img">
-                <div class="card-info">
-                    <span class="name">安小丫</span>
-                    <span class="role">地图制图</span>
-                </div>
-            </a>
-
-            <a href="zz.html" class="member-card">
-                <img src="image/张哲.jpg" alt="成员4" class="card-img">
-                <div class="card-info">
-                    <span class="name">张哲</span>
-                    <span class="role">文档撰写</span>
-                </div>
-            </a>
-
+    <div id="addModal" class="modal">
+        <div class="modal-content">
+            <h3>添加新成员</h3>
+            <input type="text" id="newName" placeholder="姓名 (如: 王五)">
+            <input type="text" id="newRole" placeholder="角色 (如: 前端开发)">
+            <input type="text" id="newAvatar" placeholder="头像路径 (如: image/王五.jpg)">
+            <input type="text" id="newLink" placeholder="主页文件名 (如: wangwu.html)">
+            <button onclick="submitNewMember()">确认添加</button>
+            <button class="cancel" onclick="closeModal()">取消</button>
         </div>
     </div>
 
     <script>
-        // 动画结束后，恢复页面的滚动功能（防止被遮挡层挡住点击）
+        const RENDER_HOST = "https://webgisproject.onrender.com"; // 你的后端地址
+        let isAdmin = false;
+
+        // 加载成员列表
+        async function loadMembers() {
+            const container = document.getElementById('members-container');
+            try {
+                const res = await fetch(`${RENDER_HOST}/members`);
+                if (!res.ok) throw new Error("服务器未响应");
+                const members = await res.json();
+                
+                container.innerHTML = ''; // 清空提示
+
+                if (members.length === 0) {
+                    container.innerHTML = '<p>暂无成员，请点击右下角添加。</p>';
+                    return;
+                }
+
+                members.forEach(m => {
+                    const card = document.createElement('div');
+                    card.className = 'member-card';
+                    
+                    // 点击卡片跳转逻辑 (如果是点击删除按钮，则不跳转)
+                    card.onclick = (e) => {
+                        if(e.target.className !== 'delete-btn') {
+                            window.location.href = m.page_link;
+                        }
+                    };
+
+                    card.innerHTML = `
+                        <div class="delete-btn" onclick="deleteMember(${m.id})">×</div>
+                        <img src="${m.avatar}" alt="${m.name}" class="card-img" onerror="this.src='https://via.placeholder.com/220x200?text=No+Image'">
+                        <div class="card-info">
+                            <span class="name">${m.name}</span>
+                            <span class="role">${m.role}</span>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+                
+                updateAdminState(); // 保持删除按钮的状态
+
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `<p style="color:red; text-align:center;">加载失败。<br>请检查后端 Render 是否正常运行。<br><small>${err.message}</small></p>`;
+            }
+        }
+
+        // 切换管理模式
+        function toggleAdminMode() {
+            isAdmin = !isAdmin;
+            const btn = document.querySelector('.admin-btn');
+            
+            if (isAdmin) {
+                btn.textContent = "➕ 添加成员";
+                btn.onclick = openModal; // 按钮功能变为打开弹窗
+                // 显示所有删除按钮
+                document.querySelectorAll('.delete-btn').forEach(b => b.style.display = 'block');
+            } else {
+                // 退出管理模式，刷新页面恢复初始状态最简单
+                location.reload();
+            }
+        }
+
+        function updateAdminState() {
+            if(isAdmin) {
+                document.querySelectorAll('.delete-btn').forEach(b => b.style.display = 'block');
+            }
+        }
+
+        // 弹窗控制
+        function openModal() { document.getElementById('addModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('addModal').style.display = 'none'; }
+
+        // 提交新成员
+        async function submitNewMember() {
+            const name = document.getElementById('newName').value;
+            const role = document.getElementById('newRole').value;
+            const avatar = document.getElementById('newAvatar').value;
+            const page_link = document.getElementById('newLink').value;
+
+            if(!name || !page_link) return alert('姓名和主页链接必填');
+
+            const data = { name, role, avatar, page_link };
+
+            try {
+                const res = await fetch(`${RENDER_HOST}/addmember`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if(res.ok) {
+                    alert('添加成功');
+                    closeModal();
+                    loadMembers(); // 刷新列表
+                } else {
+                    alert('添加失败');
+                }
+            } catch (err) {
+                alert('网络错误');
+            }
+        }
+
+        // 删除成员
+        async function deleteMember(id) {
+            if(!confirm('确定要删除该成员吗？')) return;
+            try {
+                const res = await fetch(`${RENDER_HOST}/deletemember`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({id})
+                });
+                if(res.ok) {
+                    loadMembers(); // 刷新
+                } else {
+                    alert('删除失败');
+                }
+            } catch (err) {
+                alert('网络错误');
+            }
+        }
+
+        // 初始化：加载成员
+        // 延时一点点是为了配合开场动画，避免请求太快
+        setTimeout(loadMembers, 500);
+
+        // 动画结束后允许滚动
         setTimeout(function() {
             document.body.style.overflow = 'auto';
-            // 也可以选择直接移除遮罩层，优化性能
-            // document.getElementById('intro-overlay').style.display = 'none';
-        }, 3500); // 3.5秒后执行，与CSS动画时间配合
+        }, 3500);
     </script>
 </body>
-
 </html>
-
