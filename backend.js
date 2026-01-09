@@ -12,19 +12,38 @@ const pool = new Pool({
 })
 
 // 处理GET请求（查询地点）
+// 修改 backend.js 中的查询函数
 async function handleGetTravelPoints(req, res) {
     try {
-        const result = await pool.query(`
+        // 1. 获取 URL 中的 owner 参数
+        const urlParams = new URLSearchParams(req.url.split('?')[1]);
+        const ownerFilter = urlParams.get('owner'); // 如果有值，说明是个人视角
+
+        let query = `
             SELECT 
                 gid,
                 province,
                 name,
                 info,
                 owner,
+                to_char(created_at, 'YYYY-MM-DD HH24:MI') as time, -- 格式化时间
                 ST_X(geom) AS lon,
                 ST_Y(geom) AS lat 
             FROM travelpoint
-        `);
+        `;
+
+        let params = [];
+        
+        // 2. 如果传了 owner 参数，就加上 WHERE 条件
+        if (ownerFilter) {
+            query += ` WHERE owner = $1`;
+            params.push(ownerFilter);
+        }
+
+        // 按时间倒序排列
+        query += ` ORDER BY created_at DESC`;
+
+        const result = await pool.query(query, params);
         res.end(JSON.stringify(result.rows));
     } catch (err) {
         res.statusCode = 500;
@@ -209,3 +228,4 @@ server.listen(PORT, () => {
 // 关闭连接池
 process.on('SIGTERM', () => pool.end())
 process.on('SIGINT', () => pool.end())
+
